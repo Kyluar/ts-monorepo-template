@@ -1,0 +1,14 @@
+{
+  "name": "ci-module",
+  "engineVersion": "v0.20.3",
+  "sdk": {
+    "source": "typescript"
+  },
+  "dependencies": [
+    {
+      "name": "utils",
+      "source": "ci/utils"
+    }
+  ],
+  "source": "ci"
+}

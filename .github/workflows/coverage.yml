@@ -1,0 +1,31 @@
+name: Test Coverage
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [main, develop]
+
+jobs:
+  test_coverage:
+    name: test_coverage
+    runs-on: ubuntu-latest
+    permissions:
+        contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run Test Coverage
+        uses: dagger/dagger-for-github@496f1b3d8b0d823834c13e67cf8a8e08ca3b9602 # v8.4.0
+        with:
+          version: "latest"
+          verb: call
+          args: test-coverage --output=./coverage
+
+      - name: Upload Coverage Result
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 #v4
+        with:
+          name: coverage
+          path: ./coverage
+          retention-days: 30
+

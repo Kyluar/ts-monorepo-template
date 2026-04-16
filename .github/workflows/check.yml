@@ -1,0 +1,21 @@
+name: Dagger Check 
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [main, develop]
+
+jobs:
+  check:
+    name: check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
+
+      - name: Run Check
+        uses: dagger/checks@765b9ae2bb9b17fa7b1214958c7589a84d1e6ed0 #v1.0.0
+
+    
+

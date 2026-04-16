@@ -1,0 +1,98 @@
+import { 
+  argument, 
+  check,
+  dag,
+  type Directory, 
+  object, 
+  func 
+} from "@dagger.io/dagger";
+
+import { ICiModule } from "./interfaces";
+
+@object()
+export class CiModule implements ICiModule {
+
+  source: Directory
+
+  /**
+   * Main module with CI functions
+   * @param source path of the monorepo's root 
+   */
+  constructor(
+    @argument({ 
+      defaultPath: ".", ignore: ["**/.next", "**/node_modules", "**/.turbo", "**/dist", "**/coverage"] 
+    })
+    source: Directory
+  ){
+    this.source = source
+  }
+
+  @func()
+  @check()
+  async codeQuality(): Promise<void> {
+    dag.utils({source: this.source}).baseEnvironment()
+      .withExec(["pnpm", "turbo", "run", "lint", "check-types"])
+      .sync();
+  }
+
+  @func()
+  @check()
+  async buildProject(): Promise<void> {
+    dag.utils({source: this.source}).baseEnvironment()
+      .withExec(["pnpm", "turbo", "run", "build"])
+      .sync();
+  }
+
+  @func()
+  async testCoverage(): Promise<Directory> {
+    return dag.utils({source: this.source}).baseEnvironment()
+      .withExec(["sh", "-c", "pnpm --filter=@repo/vitest-config build"])
+      .withExec(["pnpm", "test:coverage"])
+      .directory("/app/coverage")
+  }
+
+  async runE2eSmokeTests(): Promise<Directory> {
+    const container = dag.utils({source: this.source}).testEnvironment()
+      .withExec(["sh", "-c", `pnpm turbo run test:e2e:smoke`])
+
+    return dag.utils({source: this.source}).collectPlaywrightReports(container)
+  }
+
+  @func()
+  async runE2eTests(): Promise<Directory> {
+    const container = dag.utils({source: this.source}).testEnvironment()
+      .withExec(["sh", "-c", `pnpm turbo run test:e2e`])
+
+    return dag.utils({source: this.source}).collectPlaywrightReports(container)
+  }
+
+  @func()
+  async commitlintMessage(message:string): Promise<string> {
+    return await dag.utils({source: this.source}).baseEnvironment()
+      .withExec(["sh", "-c", `echo "${message}" | pnpm commitlint --verbose`])
+      .stdout()
+  }
+  
+  @func()
+  async commitlintRange(from: string, to: string = "HEAD"): Promise<string> {
+    return await dag.utils({source: this.source}).baseEnvironment()
+      .withExec(["pnpm", "commitlint", "--from", from, "--to", to, "--verbose"])
+      .stdout()
+  }
+
+  @func()
+  async buildAndPublishApp(app: string, ttl: string = '1h'): Promise<string> {  
+    const dockerfile = `/apps/${app}/Dockerfile`
+    const dockerfileExists = await this.source.exists(dockerfile)
+
+    if(!dockerfileExists) throw new Error(`Dockerfile not found on ${dockerfile}`)
+
+    const head = this.source.asGit().head()
+    const branch = (await head.ref()).replace('refs/heads/', '')
+    const commitId = (await head.commit()).substring(0,7)
+    const imageName = `${branch}-${app}-${commitId}`
+
+    const image = dag.utils({source: this.source}).buildImage(dockerfile)
+    return dag.utils({source: this.source}).ttlShPublish(image, imageName, ttl)
+  }
+}

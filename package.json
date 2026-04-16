@@ -1,0 +1,49 @@
+{
+  "name": "app",
+  "private": true,
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "format": "biome format --write",
+    "check-types": "turbo run check-types",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "turbo run test:e2e",
+    "test:e2e:smoke": "turbo run test:e2e:smoke",
+    "commit": "cz",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.4.8",
+    "@commitlint/cli": "^20.5.0",
+    "@repo/vitest-config": "workspace:*",
+    "@vitest/coverage-v8": "4.1.2",
+    "commitizen": "^4.3.1",
+    "commitlint-config-gitmoji": "^2.3.1",
+    "cz-conventional-changelog": "3.3.0",
+    "cz-emoji-conventional": "^1.2.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
+    "turbo": "^2.8.20",
+    "typescript": "5.9.2",
+    "vitest": "^4.1.2"
+  },
+  "packageManager": "pnpm@10.33.0",
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-emoji-conventional",
+      "useGitmojis": true
+    }
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,json}": [
+      "biome check --write --no-errors-on-unmatched"
+    ]
+  },
+  "engines": {
+    "node": ">=24.0.0",
+    "pnpm": "10.33.0"
+  }
+}
