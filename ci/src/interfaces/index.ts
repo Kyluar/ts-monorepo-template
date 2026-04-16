@@ -45,4 +45,10 @@ export interface ICiModule {
      * @param ttl time to image expire (5m | 1h | 24h)
      */
     buildAndPublishApp(app: string, ttl: string): Promise<string>
+
+    /**
+     * Runs Semgrep SAST scan on the monorepo source code
+     * @param error defines wheter to throw an error or not (defaults to true)
+     */
+    semgrepScan(error:boolean): Promise<string>
 }

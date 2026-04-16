@@ -1,1 +1,2 @@
 pnpm exec turbo run build test:e2e
+pnpm security:sast
