@@ -12,7 +12,7 @@
 		"@playwright/test": "^1.59.1",
 		"@repo/biome-config": "workspace:*",
 		"@repo/typescript-config": "workspace:*",
-		"@types/node": "^22.15.3"
+		"@types/node": "^25.6.0"
 	},
 	"dependencies": {
 		"@axe-core/playwright": "^4.11.1",
