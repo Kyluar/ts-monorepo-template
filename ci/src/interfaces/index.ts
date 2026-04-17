@@ -17,14 +17,10 @@ export interface ICiModule {
     testCoverage(): Promise<Directory>
 
     /**
-     * Runs E2E smoke tests and returns a report folder
+     * Runs E2E tests and returns a report folder
+     * @param smoke enable smoke tests (default=false)
      */
-    runE2eSmokeTests(): Promise<Directory>
-
-    /**
-     * Runs all E2E tests and returns a report folder
-     */
-    runE2eTests(): Promise<Directory>
+    e2eTests(smoke:boolean): Promise<Directory>
 
     /**
      * Validates a single commit message string against standard rules

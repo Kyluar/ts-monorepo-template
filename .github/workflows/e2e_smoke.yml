@@ -18,7 +18,7 @@ jobs:
         with:
           version: "latest"
           verb: call
-          args: run-e-2-e-smoke-tests --output=./playwright-results
+          args: e-2-e-tests --smoke=true --output=./playwright-results
 
       - name: Upload Test Reports
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 #v4
