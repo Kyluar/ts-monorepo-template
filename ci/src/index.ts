@@ -44,6 +44,22 @@ export class CiModule implements ICiModule {
   }
 
   @func()
+  @check()
+  async semgrepScan(error:boolean=true): Promise<string> {
+    const rules = ["typescript", "react", "javascript", "nodejs", "owasp-top-ten", "secrets"]
+    const config = rules.map(str => `--config p/${str}`).join(" ")
+    const errFlag = error ? "--error" : ""
+    return dag
+    .container()
+    .from("semgrep/semgrep")
+    .withMountedDirectory("/src", this.source)
+    .withWorkdir("/src")
+    .withExec(
+      ["sh", "-c", `semgrep scan ${errFlag} ${config} .`],
+    ).stdout()
+  }
+
+  @func()
   async testCoverage(): Promise<Directory> {
     return dag.utils({source: this.source}).baseEnvironment()
       .withExec(["sh", "-c", "pnpm --filter=@repo/vitest-config build"])
