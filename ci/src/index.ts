@@ -67,17 +67,11 @@ export class CiModule implements ICiModule {
       .directory("/app/coverage")
   }
 
-  async runE2eSmokeTests(): Promise<Directory> {
-    const container = dag.utils({source: this.source}).testEnvironment()
-      .withExec(["sh", "-c", `pnpm turbo run test:e2e:smoke`])
-
-    return dag.utils({source: this.source}).collectPlaywrightReports(container)
-  }
-
   @func()
-  async runE2eTests(): Promise<Directory> {
+  async e2eTests(smoke:boolean=false): Promise<Directory> {
+    const cmd = smoke ? "test:e2e:smoke" : "test:e2e"
     const container = dag.utils({source: this.source}).testEnvironment()
-      .withExec(["sh", "-c", `pnpm turbo run test:e2e`])
+      .withExec(["sh", "-c", `pnpm turbo ${cmd}`])
 
     return dag.utils({source: this.source}).collectPlaywrightReports(container)
   }
