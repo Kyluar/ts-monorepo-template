@@ -1,4 +1,4 @@
 pnpm exec lint-staged --allow-empty
 pnpm security:secrets
-pnpm security:sast --error=false
+pnpm security:sast
 pnpm exec turbo run test test:e2e:smoke

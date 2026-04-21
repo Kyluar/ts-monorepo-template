@@ -44,7 +44,6 @@ export interface ICiModule {
 
     /**
      * Runs Semgrep SAST scan on the monorepo source code
-     * @param error defines wheter to throw an error or not (defaults to true)
      */
-    semgrepScan(error:boolean): Promise<string>
+    semgrepScan(): Promise<string>
 }
