@@ -58,6 +58,19 @@ export class CiModule implements ICiModule {
   }
 
   @func()
+  async trufflehogScan(sinceCommit: string = "HEAD"): Promise<string> {
+    const args = `--since-commit ${sinceCommit} --results=verified,unknown --fail`
+    return dag
+    .container()
+    .from("trufflesecurity/trufflehog:3.94.3")
+    .withMountedDirectory("/src", this.source)
+    .withWorkdir("/src")
+    .withExec(
+      ["sh", "-c", `trufflehog git file://. ${args}`],
+    ).stderr()
+  }
+
+  @func()
   async testCoverage(): Promise<Directory> {
     return dag.utils({source: this.source}).baseEnvironment()
       .withExec(["sh", "-c", "pnpm --filter=@repo/vitest-config build"])

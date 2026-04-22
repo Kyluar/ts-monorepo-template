@@ -46,4 +46,10 @@ export interface ICiModule {
      * Runs Semgrep SAST scan on the monorepo source code
      */
     semgrepScan(): Promise<string>
+
+    /**
+     * Runs TruffleHog secret scan on the git history
+     * @param sinceCommit scan commits newer than this SHA (defaults to "HEAD")
+     */
+    trufflehogScan(sinceCommit?: string): Promise<string>
 }
