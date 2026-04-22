@@ -49,7 +49,7 @@ export interface ICiModule {
 
     /**
      * Runs TruffleHog secret scan on the git history
-     * @param sinceCommit scan commits newer than this SHA (defaults to "HEAD")
+     * @param sinceCommit scan commits newer than this SHA (defaults to "HEAD~1")
      */
     trufflehogScan(sinceCommit?: string): Promise<string>
 }

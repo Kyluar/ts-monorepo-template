@@ -58,7 +58,7 @@ export class CiModule implements ICiModule {
   }
 
   @func()
-  async trufflehogScan(sinceCommit: string = "HEAD"): Promise<string> {
+  async trufflehogScan(sinceCommit: string = "HEAD~1"): Promise<string> {
     const args = `--since-commit ${sinceCommit} --results=verified,unknown --fail`
     return dag
     .container()
