@@ -5,10 +5,18 @@ on:
     types: [opened, synchronize, reopened]
     branches: [main, develop]
 
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   e2e:
-    name: e2e
-    runs-on: ubuntu-latest
+    name: "E2E Tests"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -22,8 +30,8 @@ jobs:
 
       - name: Upload Test Reports
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 #v4
-        if: failure() 
+        if: failure()
         with:
-          name: playwright-reports
-          path: ./playwright-reports
+          name: playwright-results
+          path: ./playwright-results
           retention-days: 30

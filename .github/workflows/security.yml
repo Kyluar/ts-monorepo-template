@@ -1,4 +1,4 @@
-name: Security 
+name: Security
 
 on:
   pull_request:
@@ -11,8 +11,8 @@ concurrency:
 
 jobs:
   sast:
-    name: sast
-    runs-on: ubuntu-latest
+    name: "SAST"
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     permissions:
       contents: read
@@ -29,8 +29,8 @@ jobs:
           args: semgrep-scan
 
   secret-scan:
-    name: secret-scan
-    runs-on: ubuntu-latest
+    name: "Secret Scan"
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     permissions:
       contents: read
@@ -47,4 +47,3 @@ jobs:
           version: "latest"
           verb: call
           args: trufflehog-scan --since-commit=${{ github.event.pull_request.base.sha }}
-
