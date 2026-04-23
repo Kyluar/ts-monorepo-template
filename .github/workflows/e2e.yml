@@ -3,7 +3,7 @@ name: E2E Tests
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-    branches: [main]
+    branches: [main, develop]
 
 jobs:
   e2e:
@@ -18,4 +18,12 @@ jobs:
         with:
           version: "latest"
           verb: call
-          args: e-2-e-tests
+          args: e-2-e-tests --output=./playwright-results
+
+      - name: Upload Test Reports
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 #v4
+        if: failure() 
+        with:
+          name: playwright-reports
+          path: ./playwright-reports
+          retention-days: 30
