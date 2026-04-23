@@ -12,9 +12,9 @@ export interface ICiModule {
     buildProject(): Promise<void>
 
     /**
-     * Runs pnpm test:coverage and returns de coverage result folder
+     * Runs unit and integration tests with coverage and returns the coverage folder
      */
-    testCoverage(): Promise<Directory>
+    fastTests(): Promise<Directory>
 
     /**
      * Runs E2E tests and returns a report folder
