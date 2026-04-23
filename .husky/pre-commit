@@ -1,4 +1,4 @@
 pnpm exec lint-staged --allow-empty
-sh scripts/secret-scan.sh
+sh scripts/commit-secret-scan.sh
 pnpm security:sast
 pnpm exec turbo run test test:e2e:smoke
