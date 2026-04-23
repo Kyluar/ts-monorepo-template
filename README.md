@@ -16,9 +16,9 @@ Este template inclui, de saída:
 - **Testes E2E** com Playwright em `apps/web-e2e` (Chromium, Firefox, WebKit)
 - **Cobertura** de testes com `@vitest/coverage-v8`
 - **Biome** como linter e formatter (substitui ESLint + Prettier)
-- **Husky** com hooks `pre-commit` (lint-staged), `commit-msg` (commitlint) e `pre-push` (build)
+- **Husky** com hooks `pre-commit` (lint-staged + TruffleHog + Semgrep), `commit-msg` (commitlint) e `pre-push` (TruffleHog + build + E2E)
 - **Commits** no formato gitmoji conventional (enforced via commitizen + commitlint)
-- **CI** com GitHub Actions + Dagger: qualidade de código, build, commitlint, cobertura e E2E
+- **CI** com GitHub Actions + Dagger: qualidade de código, build, commitlint, cobertura, E2E e security scanning (Semgrep + TruffleHog)
 
 ## Pré-requisitos
 
@@ -26,8 +26,14 @@ Este template inclui, de saída:
 |---|---|
 | Node.js | `>= 24.0.0` |
 | pnpm | `10.33.0` |
+| Dagger CLI | qualquer |
+| TruffleHog | qualquer (CLI nativo) |
 
 > Instale o pnpm com `corepack enable && corepack prepare pnpm@10.33.0 --activate`.
+
+> Instale o Dagger CLI conforme a [documentação oficial](https://docs.dagger.io/install). O hook `pre-commit` chama `dagger call semgrep-scan` via `pnpm security:sast`.
+
+> Instale o TruffleHog com `brew install trufflehog` (macOS/Linux), `choco install trufflehog` (Windows) ou via [GitHub Releases](https://github.com/trufflesecurity/trufflehog/releases). O binário `trufflehog` deve estar no `PATH` — os hooks `pre-commit` e `pre-push` o chamam diretamente.
 
 ## Instalação e execução local
 
@@ -108,9 +114,9 @@ Substitui ESLint e Prettier. Configuração compartilhada em `packages/biome-con
 
 | Hook | O que faz |
 |---|---|
-| `pre-commit` | `lint-staged` — Biome check + write nos arquivos staged |
+| `pre-commit` | `lint-staged` (Biome check + write nos arquivos staged) → TruffleHog nos arquivos staged → Semgrep SAST |
 | `commit-msg` | `commitlint` com config gitmoji — rejeita commits fora do padrão |
-| `pre-push` | `turbo run build` — bloqueia o push se o build falhar |
+| `pre-push` | TruffleHog no range de commits do push → `turbo run build test:e2e` — bloqueia o push se qualquer etapa falhar |
 
 ### Formato de commits
 
@@ -124,8 +130,8 @@ Cinco workflows em `.github/workflows/`, todos executados via **Dagger**:
 
 | Workflow | Trigger | O que faz |
 |---|---|---|
-| `check.yml` | push/PR para `main`/`develop` | Qualidade de código + build |
+| `check.yml` | PRs para `main`/`develop` | Qualidade de código + build |
+| `fast-tests.yml` | PRs para `main`/`develop` | Testes unitários + cobertura; faz upload do artifact (30 dias) |
+| `e2e-tests.yml` | PRs para `main`/`develop` | E2E completo (todos os browsers); faz upload do report em falha |
 | `pr_commit_lint.yml` | PRs para `main`/`develop` | Lint do título e range de commits do PR |
-| `coverage.yml` | PRs para `main`/`develop` | Testes com cobertura + upload de resultados |
-| `e2e_smoke.yml` | PRs para `develop` | E2E smoke (Chromium) |
-| `e2e_full.yml` | PRs para `main` | E2E completo (Chromium + Firefox + WebKit) |
+| `security.yml` | PRs para `main`/`develop` | Semgrep SAST + TruffleHog secret scan |
