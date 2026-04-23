@@ -52,7 +52,7 @@ pnpm format                       # biome format --write (auto-fix formatting)
 ```sh
 pnpm commit                       # interactive gitmoji conventional commit (commitizen)
 ```
-Commits must follow gitmoji conventional format — enforced by commitlint on `commit-msg` hook and in CI for PRs.
+Commits must follow gitmoji conventional format — enforced by commitlint on `commit-msg` hook and in CI for PRs. Format: `<emoji> <type>(<scope>): <description>` (e.g. `✨ feat(ui): add Button component`).
 
 ### Docker / CI (Dagger)
 ```sh
@@ -65,9 +65,9 @@ make clean        # remove containers and volumes
 
 ## Git Hooks (Husky)
 
-- `pre-commit`: runs `lint-staged` — biome check+write on staged `*.{js,jsx,ts,tsx,json}` files
+- `pre-commit`: runs `lint-staged` (biome check+write on staged `*.{js,jsx,ts,tsx,json}`), then `scripts/secret-scan.sh` (TruffleHog on staged files), then `pnpm security:sast` (Semgrep)
 - `commit-msg`: runs commitlint with gitmoji config
-- `pre-push`: runs `turbo run build` — push is blocked if the build fails
+- `pre-push`: runs TruffleHog on the pushed commit range (`scripts/push-secret-scan.sh`), then `turbo run build test:e2e` — push is blocked if any step fails
 
 ## Architecture
 
@@ -98,15 +98,16 @@ ci/             # Dagger CI module (TypeScript)
 
 - Written in TypeScript using the Dagger SDK (`@dagger.io/dagger`)
 - Five GitHub Actions workflows in `.github/workflows/`:
-  - `check.yml` — runs `codeQuality` + `buildProject` Dagger checks on push/PR to `main`/`develop`
+  - `check.yml` — runs `codeQuality` + `buildProject` Dagger checks on PRs to `main`/`develop`
+  - `fast-tests.yml` — runs `fastTests` (unit + coverage), uploads coverage artifact (30-day retention)
+  - `e2e-tests.yml` — runs full cross-browser E2E tests, uploads Playwright reports on failure
   - `pr_commit_lint.yml` — lints PR title and commit range with commitlint via Dagger
-  - `coverage.yml` — runs `testCoverage` and uploads results on PRs to `main`/`develop`
-  - `e2e_smoke.yml` — Chromium-only smoke tests on PRs to `develop`
-  - `e2e_full.yml` — full cross-browser E2E tests on PRs to `main`
+  - `security.yml` — two jobs: Semgrep SAST (`semgrep-scan`) + TruffleHog secret scan (`trufflehog-scan`) on PRs
 - The `buildAndPublishApp` function builds a Dockerfile from `apps/<app>/Dockerfile` and publishes to ttl.sh with a tag `<branch>-<app>-<commitId>`
 
 ### Tooling
 
 - **Biome** replaces ESLint + Prettier — line width 120, 2-space indent, recommended rules
-- **Turbo** orchestrates all tasks; `build` depends on `^build`, `lint`/`check-types` depend on `^lint`/`^check-types`
+- **Turbo** orchestrates all tasks; `build` depends on `^build`, `lint`/`check-types` depend on `^lint`/`^check-types`. Non-obvious: `web#check-types` and all `test` tasks explicitly depend on `@repo/vitest-config#build`, so the config package must compile first
+- **`@repo/ui` deep imports** work because the package exports `'./*': './src/index.ts'`, allowing `import { Button } from '@repo/ui/button'` to resolve to `packages/ui/src/button.ts`
 - **Node ≥ 24**, **pnpm 10.33.0** required (enforced in `package.json#engines`)
