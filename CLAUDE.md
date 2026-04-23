@@ -65,7 +65,7 @@ make clean        # remove containers and volumes
 
 ## Git Hooks (Husky)
 
-- `pre-commit`: runs `lint-staged` (biome check+write on staged `*.{js,jsx,ts,tsx,json}`), then `scripts/secret-scan.sh` (TruffleHog on staged files), then `pnpm security:sast` (Semgrep)
+- `pre-commit`: runs `lint-staged` (biome check+write on staged `*.{js,jsx,ts,tsx,json}`), then `scripts/commit-secret-scan.sh` (TruffleHog on staged files), then `pnpm security:sast` (Semgrep)
 - `commit-msg`: runs commitlint with gitmoji config
 - `pre-push`: runs TruffleHog on the pushed commit range (`scripts/push-secret-scan.sh`), then `turbo run build test:e2e` — push is blocked if any step fails
 
