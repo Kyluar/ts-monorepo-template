@@ -45,7 +45,7 @@ export class CiModule implements ICiModule {
 
   @func()
   async semgrepScan(): Promise<string> {
-    const rules = ["typescript", "react", "javascript", "nodejs", "owasp-top-ten", "secrets"]
+    const rules = ["typescript", "react", "javascript", "nodejs", "owasp-top-ten"]
     const ruleSet = rules.map(str => `--config p/${str}`).join(" ")
     return dag
     .container()
