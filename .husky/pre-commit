@@ -1,3 +1,4 @@
+#!/usr/bin/env sh
 pnpm exec lint-staged --allow-empty
 sh scripts/commit-secret-scan.sh
 pnpm security:sast
