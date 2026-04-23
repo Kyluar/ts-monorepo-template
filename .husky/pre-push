@@ -1,5 +1,2 @@
-while IFS=' ' read -r local_ref local_sha remote_ref remote_sha; do
-  sh scripts/push-secret-scan.sh "$local_sha" "$remote_sha"
-done
-
+sh scripts/push-secret-scan.sh
 pnpm exec turbo run build test:e2e
