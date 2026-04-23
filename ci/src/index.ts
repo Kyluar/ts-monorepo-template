@@ -71,7 +71,7 @@ export class CiModule implements ICiModule {
   }
 
   @func()
-  async testCoverage(): Promise<Directory> {
+  async fastTests(): Promise<Directory> {
     return dag.utils({source: this.source}).baseEnvironment()
       .withExec(["sh", "-c", "pnpm --filter=@repo/vitest-config build"])
       .withExec(["pnpm", "test:coverage"])
