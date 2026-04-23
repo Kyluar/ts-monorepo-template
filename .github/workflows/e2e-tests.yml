@@ -6,7 +6,7 @@ on:
     branches: [main, develop]
 
 concurrency:
-  group: e2e-${{ github.ref }}
+  group: e2e-tests-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
