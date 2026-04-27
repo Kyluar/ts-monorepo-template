@@ -3,7 +3,7 @@ name: Dagger Check
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-    branches: [main, develop]
+    branches: [main]
 
 concurrency:
   group: check-${{ github.ref }}

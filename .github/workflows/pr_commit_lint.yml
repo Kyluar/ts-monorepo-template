@@ -3,7 +3,7 @@ name: PR Commitlint
 on:
   pull_request:
     types: [opened, edited, synchronize, reopened]
-    branches: [main, develop]
+    branches: [main]
 
 concurrency:
   group: commitlint-${{ github.ref }}
