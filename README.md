@@ -130,8 +130,8 @@ Cinco workflows em `.github/workflows/`, todos executados via **Dagger**:
 
 | Workflow | Trigger | O que faz |
 |---|---|---|
-| `check.yml` | PRs para `main`/`develop` | Qualidade de código + build |
-| `fast-tests.yml` | PRs para `main`/`develop` | Testes unitários + cobertura; faz upload do artifact (30 dias) |
-| `e2e-tests.yml` | PRs para `main`/`develop` | E2E completo (todos os browsers); faz upload do report em falha |
-| `pr_commit_lint.yml` | PRs para `main`/`develop` | Lint do título e range de commits do PR |
-| `security.yml` | PRs para `main`/`develop` | Semgrep SAST + TruffleHog secret scan |
+| `check.yml` | PRs para `main` | Qualidade de código + build |
+| `fast-tests.yml` | PRs para `main` | Testes unitários + cobertura; faz upload do artifact (30 dias) |
+| `e2e-tests.yml` | PRs para `main` | E2E completo (todos os browsers); faz upload do report em falha |
+| `pr_commit_lint.yml` | PRs para `main` | Lint do título e range de commits do PR |
+| `security.yml` | PRs para `main` | Semgrep SAST + TruffleHog secret scan |

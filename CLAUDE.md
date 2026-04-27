@@ -98,7 +98,7 @@ ci/             # Dagger CI module (TypeScript)
 
 - Written in TypeScript using the Dagger SDK (`@dagger.io/dagger`)
 - Five GitHub Actions workflows in `.github/workflows/`:
-  - `check.yml` — runs `codeQuality` + `buildProject` Dagger checks on PRs to `main`/`develop`
+  - `check.yml` — runs `codeQuality` + `buildProject` Dagger checks on PRs to `main`
   - `fast-tests.yml` — runs `fastTests` (unit + coverage), uploads coverage artifact (30-day retention)
   - `e2e-tests.yml` — runs full cross-browser E2E tests, uploads Playwright reports on failure
   - `pr_commit_lint.yml` — lints PR title and commit range with commitlint via Dagger
