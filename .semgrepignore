@@ -1,0 +1,10 @@
+:include .gitignore
+
+**/*.spec.js
+**/*.spec.jsx
+**/*.test.js
+**/*.test.jsx
+**/*.spec.ts
+**/*.spec.tsx
+**/*.test.ts
+**/*.test.tsx

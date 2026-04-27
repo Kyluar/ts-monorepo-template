@@ -44,24 +44,45 @@ export class CiModule implements ICiModule {
   }
 
   @func()
-  async testCoverage(): Promise<Directory> {
+  async semgrepScan(): Promise<string> {
+    const rules = ["typescript", "react", "javascript", "nodejs", "owasp-top-ten"]
+    const ruleSet = rules.map(str => `--config p/${str}`).join(" ")
+    return dag
+    .container()
+    .from("semgrep/semgrep")
+    .withMountedDirectory("/src", this.source)
+    .withWorkdir("/src")
+    .withExec(
+      ["sh", "-c", `semgrep scan --error ${ruleSet} .`],
+    ).stderr()
+  }
+
+  @func()
+  async trufflehogScan(sinceCommit: string = "HEAD~1"): Promise<string> {
+    const args = `--since-commit ${sinceCommit} --results=verified,unknown --fail`
+    return dag
+    .container()
+    .from("trufflesecurity/trufflehog:3.94.3")
+    .withMountedDirectory("/src", this.source)
+    .withWorkdir("/src")
+    .withExec(
+      ["sh", "-c", `trufflehog git file://. ${args}`],
+    ).stderr()
+  }
+
+  @func()
+  async fastTests(): Promise<Directory> {
     return dag.utils({source: this.source}).baseEnvironment()
       .withExec(["sh", "-c", "pnpm --filter=@repo/vitest-config build"])
       .withExec(["pnpm", "test:coverage"])
       .directory("/app/coverage")
   }
 
-  async runE2eSmokeTests(): Promise<Directory> {
-    const container = dag.utils({source: this.source}).testEnvironment()
-      .withExec(["sh", "-c", `pnpm turbo run test:e2e:smoke`])
-
-    return dag.utils({source: this.source}).collectPlaywrightReports(container)
-  }
-
   @func()
-  async runE2eTests(): Promise<Directory> {
+  async e2eTests(smoke:boolean=false): Promise<Directory> {
+    const cmd = smoke ? "test:e2e:smoke" : "test:e2e"
     const container = dag.utils({source: this.source}).testEnvironment()
-      .withExec(["sh", "-c", `pnpm turbo run test:e2e`])
+      .withExec(["sh", "-c", `pnpm turbo ${cmd}`])
 
     return dag.utils({source: this.source}).collectPlaywrightReports(container)
   }

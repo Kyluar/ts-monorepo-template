@@ -12,19 +12,15 @@ export interface ICiModule {
     buildProject(): Promise<void>
 
     /**
-     * Runs pnpm test:coverage and returns de coverage result folder
+     * Runs unit and integration tests with coverage and returns the coverage folder
      */
-    testCoverage(): Promise<Directory>
+    fastTests(): Promise<Directory>
 
     /**
-     * Runs E2E smoke tests and returns a report folder
+     * Runs E2E tests and returns a report folder
+     * @param smoke enable smoke tests (default=false)
      */
-    runE2eSmokeTests(): Promise<Directory>
-
-    /**
-     * Runs all E2E tests and returns a report folder
-     */
-    runE2eTests(): Promise<Directory>
+    e2eTests(smoke:boolean): Promise<Directory>
 
     /**
      * Validates a single commit message string against standard rules
@@ -45,4 +41,15 @@ export interface ICiModule {
      * @param ttl time to image expire (5m | 1h | 24h)
      */
     buildAndPublishApp(app: string, ttl: string): Promise<string>
+
+    /**
+     * Runs Semgrep SAST scan on the monorepo source code
+     */
+    semgrepScan(): Promise<string>
+
+    /**
+     * Runs TruffleHog secret scan on the git history
+     * @param sinceCommit scan commits newer than this SHA (defaults to "HEAD~1")
+     */
+    trufflehogScan(sinceCommit?: string): Promise<string>
 }
