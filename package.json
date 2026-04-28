@@ -20,7 +20,7 @@
     "@biomejs/biome": "2.4.8",
     "@commitlint/cli": "^20.5.0",
     "@repo/vitest-config": "workspace:*",
-    "@vitest/coverage-v8": "4.1.2",
+    "@vitest/coverage-v8": "^4.1.2",
     "commitizen": "^4.3.1",
     "commitlint-config-gitmoji": "^2.3.1",
     "cz-conventional-changelog": "3.3.0",
