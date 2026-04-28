@@ -126,12 +126,13 @@ Use `pnpm commit` para o assistente interativo ou escreva manualmente seguindo o
 
 ## CI
 
-Cinco workflows em `.github/workflows/`, todos executados via **Dagger**:
+Seis workflows em `.github/workflows/`:
 
 | Workflow | Trigger | O que faz |
 |---|---|---|
-| `check.yml` | PRs para `main` | Qualidade de código + build |
-| `fast-tests.yml` | PRs para `main` | Testes unitários + cobertura; faz upload do artifact (30 dias) |
-| `e2e-tests.yml` | PRs para `main` | E2E completo (todos os browsers); faz upload do report em falha |
-| `pr_commit_lint.yml` | PRs para `main` | Lint do título e range de commits do PR |
-| `security.yml` | PRs para `main` | Semgrep SAST + TruffleHog secret scan |
+| `check.yml` | PRs para `main` | Qualidade de código + build (via Dagger) |
+| `fast-tests.yml` | PRs para `main` | Testes unitários + cobertura; faz upload do artifact (30 dias) (via Dagger) |
+| `e2e-tests.yml` | PRs para `main` | E2E completo (todos os browsers); faz upload do report em falha (via Dagger) |
+| `pr_commit_lint.yml` | PRs para `main` (exceto Dependabot) | Lint do título e range de commits do PR (via Dagger) |
+| `security.yml` | PRs para `main` | Semgrep SAST + TruffleHog secret scan (via Dagger) |
+| `dependabot-auto-merge.yml` | PRs do Dependabot para `main` | Aprova e habilita squash-merge automático para atualizações minor/patch |
