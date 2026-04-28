@@ -26,10 +26,12 @@ jobs:
 
       - name: Lint PR title
         uses: dagger/dagger-for-github@496f1b3d8b0d823834c13e67cf8a8e08ca3b9602 # v8.4.0
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
         with:
           version: "latest"
           verb: call
-          args: commitlint-message --message "${{ github.event.pull_request.title }}"
+          args: commitlint-message --message "$PR_TITLE"
 
       - name: Lint commit range
         uses: dagger/dagger-for-github@496f1b3d8b0d823834c13e67cf8a8e08ca3b9602 # v8.4.0
