@@ -15,7 +15,7 @@
 		"@types/node": "^25.6.0"
 	},
 	"dependencies": {
-		"@axe-core/playwright": "^4.11.1",
+		"@axe-core/playwright": "^4.11.2",
 		"web": "workspace:*"
 	}
 }
