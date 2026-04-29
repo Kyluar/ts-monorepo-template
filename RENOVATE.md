@@ -161,6 +161,14 @@
        "automerge": false,
        "dependencyDashboardApproval": true,
        "description": "Imagens de segurança (semgrep, trufflehog) requerem aprovação manual"
+     },
+     {
+       "matchDepTypes": ["engines"],
+       "matchPackageNames": ["node", "pnpm"],
+       "automerge": false,
+       "dependencyDashboardApproval": true,
+       "groupName": "runtime versions",
+       "description": "Node e pnpm afetam CI, Docker e ambiente local — requerem aprovação manual"
      }
    ]
  }
@@ -177,14 +185,6 @@
  jobs:
    renovate:
      name: "Renovate"
-     runs-on: ubuntu-24.04
-     timeout-minutes: 30
-     permissions:
-       contents: write
-       pull-requests: write
-       issues: write
-
-     runs-on: ubuntu-24.04
      runs-on: ubuntu-24.04
      timeout-minutes: 30
      permissions:
