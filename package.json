@@ -18,7 +18,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.13",
-    "@commitlint/cli": "^20.5.0",
+    "@commitlint/cli": "^20.5.2",
     "@repo/vitest-config": "workspace:*",
     "@vitest/coverage-v8": "^4.1.2",
     "commitizen": "^4.3.1",
