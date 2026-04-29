@@ -1,7 +1,7 @@
-.PHONY: fresh-build build up start stop remove logs clean help
+.PHONY: fresh-build build up start stop remove logs clean help check-vars
 
-NODE_VERSION=$(shell dagger call -m ci/utils get-node-version)
-PNPM_VERSION=$(shell dagger call -m ci/utils get-pnpm-version)
+NODE_VERSION=$(shell sh ./scripts/get-node-version.sh)
+PNPM_VERSION=$(shell sh ./scripts/get-pnpm-version.sh)
 
 VARS := NODE_VERSION=$(NODE_VERSION) PNPM_VERSION=$(PNPM_VERSION)
 BASE := $(VARS) docker-compose -f docker-compose.yml
@@ -30,6 +30,14 @@ logs:
 clean: 
 	$(BASE) down -v --remove-orphans
 
+check-vars:
+	@echo "--- Verificação de Env Vars ---"
+	@echo "Node Version: $(NODE_VERSION)"
+	@echo "PNPM Version: $(PNPM_VERSION)"
+	@if [ -z "$(NODE_VERSION)" ]; then echo "ERRO: NODE_VERSION está vazia!"; exit 1; fi
+	@if [ -z "$(PNPM_VERSION)" ]; then echo "ERRO: PNPM_VERSION está vazia!"; exit 1; fi
+	@echo "-------------------------------"
+
 help:
 	@echo "Comandos disponíveis:"
 	@echo "  fresh-build     : Build completo sem cache"
@@ -40,3 +48,4 @@ help:
 	@echo "  down            : Remove containers e redes"
 	@echo "  logs            : Mostra logs em tempo real"
 	@echo "  clean           : Limpa todos os recursos"
+	@echo "  check-vars      : Verifica a disponibilidade das env vars"
