@@ -35,15 +35,15 @@
  ---
  Arquivos a modificar
 
- ┌──────────────────────────────────────┬────────────────────────────────────┐
- │               Arquivo                │              Operação              │
- ├──────────────────────────────────────┼────────────────────────────────────┤
- │ ci/src/index.ts                      │ Adicionar função renovate()        │
- ├──────────────────────────────────────┼────────────────────────────────────┤
- │ .github/workflows/pr_commit_lint.yml │ Adicionar renovate[bot] à exclusão │
- ├──────────────────────────────────────┼────────────────────────────────────┤
- │ .github/dependabot.yml               │ Remover (Renovate cobre tudo)      │
- └──────────────────────────────────────┴────────────────────────────────────┘
+ ┌──────────────────────────────────────┬──────────────────────────────────────────────────┐
+ │               Arquivo                │                    Operação                      │
+ ├──────────────────────────────────────┼──────────────────────────────────────────────────┤
+ │ ci/src/index.ts                      │ Adicionar função renovate()                      │
+ ├──────────────────────────────────────┼──────────────────────────────────────────────────┤
+ │ .github/workflows/pr_commit_lint.yml │ Remover condicional de autoria (dependabot[bot]) │
+ ├──────────────────────────────────────┼──────────────────────────────────────────────────┤
+ │ .github/dependabot.yml               │ Remover (Renovate cobre tudo)                    │
+ └──────────────────────────────────────┴──────────────────────────────────────────────────┘
 
  Arquivos a criar
 
@@ -85,6 +85,7 @@
    "dependencyDashboard": true,
    "schedule": ["before 8am on Monday"],
    "prConcurrentLimit": 3,
+   "commitMessage": "🏗️ build(deps): update {{{depName}}} from {{{currentVersion}}} to {{{newVersion}}}",
    "packageRules": [
      {
        "matchUpdateTypes": ["patch", "minor"],
@@ -94,6 +95,11 @@
        "matchUpdateTypes": ["major"],
        "automerge": false,
        "dependencyDashboardApproval": true
+     },
+     {
+       "groupName": "react",
+       "matchPackageNames": ["react", "react-dom", "@types/react", "@types/react-dom"],
+       "prTitle": "🏗️ build(deps): update react packages"
      }
    ]
  }
@@ -138,14 +144,13 @@
          env:
            RENOVATE_TOKEN: ${{ secrets.RENOVATE_TOKEN }}
 
- 4. .github/workflows/pr_commit_lint.yml — Exclusão do renovate[bot]
+ 4. .github/workflows/pr_commit_lint.yml — Remover condicional de autoria
 
- Alterar linha 15:
- # antes
+ Remover a linha 15:
  if: github.actor != 'dependabot[bot]'
 
- # depois
- if: github.actor != 'dependabot[bot]' && github.actor != 'renovate[bot]'
+ O job passa a rodar sem restrição de autor — Renovate terá seus commits validados
+ normalmente pelo commitlint.
 
  5. .github/dependabot.yml — Remover
 
