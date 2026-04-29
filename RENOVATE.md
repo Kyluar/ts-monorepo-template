@@ -129,6 +129,13 @@
    "customManagers": [
      {
        "customType": "regex",
+       "fileMatch": ["^\\.nvmrc$"],
+       "matchStrings": ["(?<currentValue>[\\d\\.]+)"],
+       "depNameTemplate": "node",
+       "datasourceTemplate": "node-version"
+     },
+     {
+       "customType": "regex",
        "fileMatch": ["^ci/src/images\\.ts$"],
        "matchStrings": ["\"(?<depName>[^@\"]+)@sha256:(?<currentDigest>[a-f0-9]+)\""],
        "datasourceTemplate": "docker",
@@ -163,12 +170,11 @@
        "description": "Imagens de segurança (semgrep, trufflehog) requerem aprovação manual"
      },
      {
-       "matchDepTypes": ["engines"],
-       "matchPackageNames": ["node", "pnpm"],
+       "matchPackageNames": ["node"],
        "automerge": false,
        "dependencyDashboardApproval": true,
        "groupName": "runtime versions",
-       "description": "Node e pnpm afetam CI, Docker e ambiente local — requerem aprovação manual"
+       "description": "Agrupa .nvmrc e engines.node no mesmo PR — ambos requerem aprovação manual"
      }
    ]
  }
