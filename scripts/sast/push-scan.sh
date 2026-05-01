@@ -14,7 +14,7 @@ while IFS=' ' read -r local_ref local_sha remote_ref remote_sha; do
     if [ -n "$base" ]; then
       changed_files=$(git diff --name-only --diff-filter=d "$base" "$local_sha")
     else
-      changed_files=$(git diff --name-only --diff-filter=d HEAD)
+      changed_files=$(git ls-files)
     fi
   else
     changed_files=$(git diff --name-only --diff-filter=d "$remote_sha" "$local_sha")
