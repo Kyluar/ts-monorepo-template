@@ -1,0 +1,64 @@
+name: Tests
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [main]
+
+jobs:
+  fast_tests:
+    name: "Fast Tests"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    concurrency:
+      group: fast-tests-${{ github.ref }}
+      cancel-in-progress: true
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run Fast Tests
+        uses: dagger/dagger-for-github@27b130bf0f79a7f6fbbbe0fbca6760dc9bb40a77 # v8.4.1
+        with:
+          version: "latest"
+          verb: call
+          args: fast-tests --output=./coverage
+
+      - name: Upload Coverage Result
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
+        with:
+          name: coverage
+          path: ./coverage
+          retention-days: 30
+
+  e2e:
+    name: "E2E Tests"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    concurrency:
+      group: e2e-tests-${{ github.ref }}
+      cancel-in-progress: true
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run E2E Tests
+        uses: dagger/dagger-for-github@27b130bf0f79a7f6fbbbe0fbca6760dc9bb40a77 # v8.4.1
+        with:
+          version: "latest"
+          verb: call
+          args: e-2-e-tests --output=./playwright-results
+
+      - name: Upload Test Reports
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
+        if: failure()
+        with:
+          name: playwright-results
+          path: ./playwright-results
+          retention-days: 30
