@@ -44,7 +44,7 @@ export class CiModule implements ICiModule {
   }
 
   @func()
-  async semgrepScan(): Promise<string> {
+  async semgrepScan(sinceCommit: string = "HEAD~1"): Promise<string> {
     const rulesContent = await this.source.file("config/semgrep-rules.txt").contents()
     const rules = rulesContent.trim().split('\n').filter(Boolean)
     const ruleSet = rules.map(str => `--config p/${str}`).join(" ")
@@ -54,7 +54,7 @@ export class CiModule implements ICiModule {
     .withMountedDirectory("/src", this.source)
     .withWorkdir("/src")
     .withExec(
-      ["sh", "-c", `semgrep scan --error ${ruleSet} .`],
+      ["sh", "-c", `files=$(git diff --name-only --diff-filter=d ${sinceCommit} HEAD); [ -z "$files" ] && exit 0; semgrep scan --error ${ruleSet} $files`],
     ).stderr()
   }
 

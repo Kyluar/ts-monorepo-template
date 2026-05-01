@@ -43,9 +43,10 @@ export interface ICiModule {
     buildAndPublishApp(app: string, ttl: string): Promise<string>
 
     /**
-     * Runs Semgrep SAST scan on the monorepo source code
+     * Runs Semgrep SAST scan on files changed since a base commit
+     * @param sinceCommit scan files changed since this commit (defaults to "HEAD~1")
      */
-    semgrepScan(): Promise<string>
+    semgrepScan(sinceCommit?: string): Promise<string>
 
     /**
      * Runs TruffleHog secret scan on the git history
