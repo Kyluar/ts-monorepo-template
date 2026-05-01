@@ -1,4 +1,4 @@
-import { type Directory } from "@dagger.io/dagger"
+import { type Directory, type File } from "@dagger.io/dagger"
 
 export interface ICiModule {
     /**
@@ -43,10 +43,10 @@ export interface ICiModule {
     buildAndPublishApp(app: string, ttl: string): Promise<string>
 
     /**
-     * Runs Semgrep SAST scan on files changed since a base commit
+     * Runs Semgrep SAST scan on files changed since a base commit and returns a SARIF report
      * @param sinceCommit scan files changed since this commit (defaults to "HEAD~1")
      */
-    semgrepScan(sinceCommit?: string): Promise<string>
+    semgrepScan(sinceCommit?: string): Promise<File>
 
     /**
      * Runs TruffleHog secret scan on the git history

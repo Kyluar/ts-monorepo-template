@@ -16,6 +16,7 @@ jobs:
     timeout-minutes: 15
     permissions:
       contents: read
+      security-events: write
 
     steps:
       - name: Checkout
@@ -28,7 +29,21 @@ jobs:
         with:
           version: "latest"
           verb: call
-          args: semgrep-scan --since-commit=${{ github.event.pull_request.base.sha }}
+          args: semgrep-scan --since-commit=${{ github.event.pull_request.base.sha }} --output=./semgrep.sarif
+
+      - name: Upload SARIF to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@95e58e9a2cdfd71adc6e0353d5c52f41a045d225 # v4.35.2
+        with:
+          sarif_file: ./semgrep.sarif
+          category: semgrep
+
+      - name: Fail on findings
+        run: |
+          count=$(jq '[.runs[].results[]] | length' ./semgrep.sarif)
+          if [ "$count" -gt 0 ]; then
+            echo "::error::Semgrep found $count issue(s). Check the Security tab for details."
+            exit 1
+          fi
 
   secret-scan:
     name: "Secret Scan"
