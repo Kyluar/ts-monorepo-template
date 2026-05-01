@@ -5,7 +5,7 @@ export interface IUtils {
      * Returns a configured Node container
      * @param distribution node image distribution
      */
-    nodeContainer: (distribution:string) => Promise<Container>
+    nodeContainer(distribution?: string): Promise<Container>
 
     /**
      * Returns a base container for other functions
