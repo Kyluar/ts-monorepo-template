@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
 push_info=$(cat)
-echo "$push_info" | sh scripts/push-secret-scan.sh
-echo "$push_info" | sh scripts/sast-push-scan.sh
+echo "$push_info" | sh scripts/secret/push-scan.sh
+echo "$push_info" | sh scripts/sast/push-scan.sh
 pnpm exec turbo run build check-types test:e2e

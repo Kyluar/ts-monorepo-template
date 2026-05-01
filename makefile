@@ -1,7 +1,7 @@
 .PHONY: fresh-build build up start stop remove logs clean help check-vars
 
-NODE_VERSION=$(shell sh ./scripts/get-node-version.sh)
-PNPM_VERSION=$(shell sh ./scripts/get-pnpm-version.sh)
+NODE_VERSION=$(shell sh ./scripts/versions/get-node.sh)
+PNPM_VERSION=$(shell sh ./scripts/versions/get-pnpm.sh)
 
 VARS := NODE_VERSION=$(NODE_VERSION) PNPM_VERSION=$(PNPM_VERSION)
 BASE := $(VARS) docker-compose -f docker-compose.yml

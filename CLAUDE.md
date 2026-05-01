@@ -65,9 +65,9 @@ make clean        # remove containers and volumes
 
 ## Git Hooks (Husky)
 
-- `pre-commit`: runs `lint-staged` (biome check+write on staged `*.{js,jsx,ts,tsx,json}`), then `scripts/commit-secret-scan.sh` (TruffleHog on staged files), then `scripts/sast-commit-scan.sh` (Semgrep via Docker on staged files only)
+- `pre-commit`: runs `lint-staged` (biome check+write on staged `*.{js,jsx,ts,tsx,json}`), then `scripts/secret/commit-scan.sh` (TruffleHog on staged files), then `scripts/sast/commit-scan.sh` (Semgrep via Docker on staged files only)
 - `commit-msg`: runs commitlint with gitmoji config
-- `pre-push`: captures push refs from stdin, pipes to `scripts/push-secret-scan.sh` (TruffleHog on push range) and `scripts/sast-push-scan.sh` (Semgrep via Docker on files changed in push range), then `turbo run build check-types test:e2e` — push is blocked if any step fails
+- `pre-push`: captures push refs from stdin, pipes to `scripts/secret/push-scan.sh` (TruffleHog on push range) and `scripts/sast/push-scan.sh` (Semgrep via Docker on files changed in push range), then `turbo run build check-types test:e2e` — push is blocked if any step fails
 
 ## Architecture
 

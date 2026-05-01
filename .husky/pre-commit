@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
 pnpm exec lint-staged --allow-empty
-sh scripts/commit-secret-scan.sh
-sh scripts/sast-commit-scan.sh
+sh scripts/secret/commit-scan.sh
+sh scripts/sast/commit-scan.sh
 pnpm exec turbo run test test:e2e:smoke
