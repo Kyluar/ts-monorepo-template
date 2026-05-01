@@ -106,7 +106,7 @@ ci/             # Dagger CI module (TypeScript)
 - Six GitHub Actions workflows in `.github/workflows/`:
   - `check.yml` — runs `codeQuality` + `buildProject` Dagger checks on PRs to `main`
   - `tests.yml` — two jobs: `fastTests` (unit + coverage, uploads coverage artifact with 30-day retention) and `e2eTests` (full cross-browser E2E, uploads Playwright reports on failure)
-  - `pr_commit_lint.yml` — lints PR title and commit range with commitlint via Dagger (skipped for Dependabot PRs)
+  - `commitlint.yml` (`Validate Commits`) — lints PR title and commit range with commitlint via Dagger (skipped for Dependabot PRs)
   - `security.yml` — two jobs: Semgrep SAST (`semgrep-scan`, outputs SARIF uploaded to GitHub Code Scanning) + TruffleHog secret scan (`trufflehog-scan`) on PRs
   - `dependabot-auto-merge.yml` — auto-approves and squash-merges Dependabot minor/patch PRs via GitHub CLI
 - The `buildAndPublishApp` function builds a Dockerfile from `apps/<app>/Dockerfile` and publishes to ttl.sh with a tag `<branch>-<app>-<commitId>`
