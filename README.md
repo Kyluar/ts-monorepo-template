@@ -101,6 +101,13 @@ pnpm check-types      # tsc --noEmit em todos os pacotes
 pnpm format           # biome format --write (auto-correção)
 ```
 
+### Segurança (varredura manual)
+
+```sh
+pnpm security:sast     # Semgrep SAST em todo o repositório (via Docker)
+pnpm security:secrets  # TruffleHog em todos os arquivos rastreados pelo git
+```
+
 ### Commits
 
 ```sh
@@ -134,8 +141,7 @@ Seis workflows em `.github/workflows/`:
 | Workflow | Trigger | O que faz |
 |---|---|---|
 | `check.yml` | PRs para `main` | Qualidade de código + build (via Dagger) |
-| `fast-tests.yml` | PRs para `main` | Testes unitários + cobertura; faz upload do artifact (30 dias) (via Dagger) |
-| `e2e-tests.yml` | PRs para `main` | E2E completo (todos os browsers); faz upload do report em falha (via Dagger) |
+| `tests.yml` | PRs para `main` | Testes unitários + cobertura (artifact 30 dias) e E2E completo (todos os browsers); faz upload do report Playwright em falha (via Dagger) |
 | `pr_commit_lint.yml` | PRs para `main` (exceto Dependabot) | Lint do título e range de commits do PR (via Dagger) |
-| `security.yml` | PRs para `main` | Semgrep SAST + TruffleHog secret scan (via Dagger) |
+| `security.yml` | PRs para `main` | Semgrep SAST (com upload SARIF para GitHub Code Scanning) + TruffleHog secret scan (via Dagger) |
 | `dependabot-auto-merge.yml` | PRs do Dependabot para `main` | Aprova e habilita squash-merge automático para atualizações minor/patch |
