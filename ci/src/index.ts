@@ -1,10 +1,11 @@
-import { 
-  argument, 
+import {
+  argument,
   check,
   dag,
-  type Directory, 
-  object, 
-  func 
+  type Directory,
+  type File,
+  object,
+  func
 } from "@dagger.io/dagger";
 
 import { ICiModule } from "./interfaces";
@@ -44,8 +45,9 @@ export class CiModule implements ICiModule {
   }
 
   @func()
-  async semgrepScan(): Promise<string> {
-    const rules = ["typescript", "react", "javascript", "nodejs", "owasp-top-ten"]
+  async semgrepScan(sinceCommit: string = "HEAD~1"): Promise<File> {
+    const rulesContent = await this.source.file("config/semgrep-rules.txt").contents()
+    const rules = rulesContent.trim().split('\n').filter(Boolean)
     const ruleSet = rules.map(str => `--config p/${str}`).join(" ")
     return dag
     .container()
@@ -53,8 +55,9 @@ export class CiModule implements ICiModule {
     .withMountedDirectory("/src", this.source)
     .withWorkdir("/src")
     .withExec(
-      ["sh", "-c", `semgrep scan --error ${ruleSet} .`],
-    ).stderr()
+      ["sh", "-c", `files=$(git diff --name-only --diff-filter=d ${sinceCommit} HEAD); [ -z "$files" ] && printf '{"version":"2.1.0","runs":[{"tool":{"driver":{"name":"Semgrep"}},"results":[]}]}' > /results.sarif && exit 0; semgrep scan --sarif --output /results.sarif ${ruleSet} $files`],
+    )
+    .file("/results.sarif")
   }
 
   @func()

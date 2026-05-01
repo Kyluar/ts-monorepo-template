@@ -2,20 +2,10 @@ import { Container, Directory } from "@dagger.io/dagger"
 
 export interface IUtils {
     /**
-     * Reads the node version in the .nvmrc file
-     */
-    getNodeVersion: () => Promise<string>
-
-    /**
-     * Reads the monorepo pnpm version on package.json 
-     */
-    getPnpmVersion: () => Promise<string>
-    
-    /**
      * Returns a configured Node container
      * @param distribution node image distribution
      */
-    nodeContainer: (distribution:string) => Promise<Container>
+    nodeContainer(distribution?: string): Promise<Container>
 
     /**
      * Returns a base container for other functions

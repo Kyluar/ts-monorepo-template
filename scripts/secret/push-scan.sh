@@ -2,6 +2,7 @@
 set -e
 
 while IFS=' ' read -r local_ref local_sha remote_ref remote_sha; do
+  [ "$local_sha" = "0000000000000000000000000000000000000000" ] && continue
   if [ -z "$remote_sha" ] || [ "$remote_sha" = "0000000000000000000000000000000000000000" ]; then
     base=$(git merge-base "$local_sha" origin/HEAD 2>/dev/null) || true
     if [ -n "$base" ]; then

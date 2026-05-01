@@ -48,6 +48,12 @@ pnpm check-types                  # tsc --noEmit on all packages
 pnpm format                       # biome format --write (auto-fix formatting)
 ```
 
+### Security (manual full-repo scan)
+```sh
+pnpm security:sast                # Semgrep SAST on entire repo (via Docker)
+pnpm security:secrets             # TruffleHog on all git-tracked files
+```
+
 ### Committing
 ```sh
 pnpm commit                       # interactive gitmoji conventional commit (commitizen)
@@ -65,9 +71,9 @@ make clean        # remove containers and volumes
 
 ## Git Hooks (Husky)
 
-- `pre-commit`: runs `lint-staged` (biome check+write on staged `*.{js,jsx,ts,tsx,json}`), then `scripts/commit-secret-scan.sh` (TruffleHog on staged files), then `pnpm security:sast` (Semgrep)
+- `pre-commit`: runs `lint-staged` (biome check+write on staged `*.{js,jsx,ts,tsx,json}`), then `scripts/secret/commit-scan.sh` (TruffleHog on staged files), then `scripts/sast/commit-scan.sh` (Semgrep via Docker on staged files only)
 - `commit-msg`: runs commitlint with gitmoji config
-- `pre-push`: runs TruffleHog on the pushed commit range (`scripts/push-secret-scan.sh`), then `turbo run build test:e2e` — push is blocked if any step fails
+- `pre-push`: captures push refs from stdin, pipes to `scripts/secret/push-scan.sh` (TruffleHog on push range) and `scripts/sast/push-scan.sh` (Semgrep via Docker on files changed in push range), then `turbo run build check-types test:e2e` — push is blocked if any step fails
 
 ## Architecture
 
@@ -99,10 +105,9 @@ ci/             # Dagger CI module (TypeScript)
 - Written in TypeScript using the Dagger SDK (`@dagger.io/dagger`)
 - Six GitHub Actions workflows in `.github/workflows/`:
   - `check.yml` — runs `codeQuality` + `buildProject` Dagger checks on PRs to `main`
-  - `fast-tests.yml` — runs `fastTests` (unit + coverage), uploads coverage artifact (30-day retention)
-  - `e2e-tests.yml` — runs full cross-browser E2E tests, uploads Playwright reports on failure
+  - `tests.yml` — two jobs: `fastTests` (unit + coverage, uploads coverage artifact with 30-day retention) and `e2eTests` (full cross-browser E2E, uploads Playwright reports on failure)
   - `pr_commit_lint.yml` — lints PR title and commit range with commitlint via Dagger (skipped for Dependabot PRs)
-  - `security.yml` — two jobs: Semgrep SAST (`semgrep-scan`) + TruffleHog secret scan (`trufflehog-scan`) on PRs
+  - `security.yml` — two jobs: Semgrep SAST (`semgrep-scan`, outputs SARIF uploaded to GitHub Code Scanning) + TruffleHog secret scan (`trufflehog-scan`) on PRs
   - `dependabot-auto-merge.yml` — auto-approves and squash-merges Dependabot minor/patch PRs via GitHub CLI
 - The `buildAndPublishApp` function builds a Dockerfile from `apps/<app>/Dockerfile` and publishes to ttl.sh with a tag `<branch>-<app>-<commitId>`
 

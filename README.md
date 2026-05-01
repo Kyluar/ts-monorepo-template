@@ -26,12 +26,15 @@ Este template inclui, de saída:
 |---|---|
 | Node.js | `>= 24.0.0` |
 | pnpm | `10.33.0` |
+| Docker | qualquer |
 | Dagger CLI | qualquer |
 | TruffleHog | qualquer (CLI nativo) |
 
 > Instale o pnpm com `corepack enable && corepack prepare pnpm@10.33.0 --activate`.
 
-> Instale o Dagger CLI conforme a [documentação oficial](https://docs.dagger.io/install). O hook `pre-commit` chama `dagger call semgrep-scan` via `pnpm security:sast`.
+> Instale o Dagger CLI conforme a [documentação oficial](https://docs.dagger.io/install). O Dagger é utilizado pelos workflows de CI no GitHub Actions.
+
+> Docker é necessário para os hooks locais de SAST (`pre-commit` e `pre-push`) e para os comandos `make`. As rulesets do Semgrep estão definidas em `config/semgrep-rules.txt`.
 
 > Instale o TruffleHog com `brew install trufflehog` (macOS/Linux), `choco install trufflehog` (Windows) ou via [GitHub Releases](https://github.com/trufflesecurity/trufflehog/releases). O binário `trufflehog` deve estar no `PATH` — os hooks `pre-commit` e `pre-push` o chamam diretamente.
 
@@ -98,6 +101,13 @@ pnpm check-types      # tsc --noEmit em todos os pacotes
 pnpm format           # biome format --write (auto-correção)
 ```
 
+### Segurança (varredura manual)
+
+```sh
+pnpm security:sast     # Semgrep SAST em todo o repositório (via Docker)
+pnpm security:secrets  # TruffleHog em todos os arquivos rastreados pelo git
+```
+
 ### Commits
 
 ```sh
@@ -114,9 +124,9 @@ Substitui ESLint e Prettier. Configuração compartilhada em `packages/biome-con
 
 | Hook | O que faz |
 |---|---|
-| `pre-commit` | `lint-staged` (Biome check + write nos arquivos staged) → TruffleHog nos arquivos staged → Semgrep SAST |
+| `pre-commit` | `lint-staged` (Biome check + write nos arquivos staged) → TruffleHog nos arquivos staged → Semgrep SAST via Docker nos arquivos staged |
 | `commit-msg` | `commitlint` com config gitmoji — rejeita commits fora do padrão |
-| `pre-push` | TruffleHog no range de commits do push → `turbo run build test:e2e` — bloqueia o push se qualquer etapa falhar |
+| `pre-push` | TruffleHog no range de commits do push → Semgrep SAST via Docker nos arquivos alterados no push → `turbo run build check-types test:e2e` — bloqueia o push se qualquer etapa falhar |
 
 ### Formato de commits
 
@@ -131,8 +141,7 @@ Seis workflows em `.github/workflows/`:
 | Workflow | Trigger | O que faz |
 |---|---|---|
 | `check.yml` | PRs para `main` | Qualidade de código + build (via Dagger) |
-| `fast-tests.yml` | PRs para `main` | Testes unitários + cobertura; faz upload do artifact (30 dias) (via Dagger) |
-| `e2e-tests.yml` | PRs para `main` | E2E completo (todos os browsers); faz upload do report em falha (via Dagger) |
+| `tests.yml` | PRs para `main` | Testes unitários + cobertura (artifact 30 dias) e E2E completo (todos os browsers); faz upload do report Playwright em falha (via Dagger) |
 | `pr_commit_lint.yml` | PRs para `main` (exceto Dependabot) | Lint do título e range de commits do PR (via Dagger) |
-| `security.yml` | PRs para `main` | Semgrep SAST + TruffleHog secret scan (via Dagger) |
+| `security.yml` | PRs para `main` | Semgrep SAST (com upload SARIF para GitHub Code Scanning) + TruffleHog secret scan (via Dagger) |
 | `dependabot-auto-merge.yml` | PRs do Dependabot para `main` | Aprova e habilita squash-merge automático para atualizações minor/patch |

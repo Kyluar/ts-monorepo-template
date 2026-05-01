@@ -12,7 +12,8 @@
     "test:coverage": "vitest run --coverage",
     "test:e2e": "turbo run test:e2e",
     "test:e2e:smoke": "turbo run test:e2e:smoke",
-    "security:sast": "dagger call semgrep-scan",
+    "security:sast": "sh scripts/sast/full-scan.sh",
+    "security:secrets": "sh scripts/secret/full-scan.sh",
     "commit": "cz",
     "prepare": "husky"
   },
@@ -44,7 +45,6 @@
     ]
   },
   "engines": {
-    "node": ">=24.0.0",
-    "pnpm": "10.33.0"
+    "node": ">=24.0.0"
   }
 }
