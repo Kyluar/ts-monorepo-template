@@ -26,12 +26,15 @@ Este template inclui, de saída:
 |---|---|
 | Node.js | `>= 24.0.0` |
 | pnpm | `10.33.0` |
+| Docker | qualquer |
 | Dagger CLI | qualquer |
 | TruffleHog | qualquer (CLI nativo) |
 
 > Instale o pnpm com `corepack enable && corepack prepare pnpm@10.33.0 --activate`.
 
-> Instale o Dagger CLI conforme a [documentação oficial](https://docs.dagger.io/install). O hook `pre-commit` chama `dagger call semgrep-scan` via `pnpm security:sast`.
+> Instale o Dagger CLI conforme a [documentação oficial](https://docs.dagger.io/install). O Dagger é utilizado pelos workflows de CI no GitHub Actions.
+
+> Docker é necessário para os hooks locais de SAST (`pre-commit` e `pre-push`) e para os comandos `make`. As rulesets do Semgrep estão definidas em `config/semgrep-rules.txt`.
 
 > Instale o TruffleHog com `brew install trufflehog` (macOS/Linux), `choco install trufflehog` (Windows) ou via [GitHub Releases](https://github.com/trufflesecurity/trufflehog/releases). O binário `trufflehog` deve estar no `PATH` — os hooks `pre-commit` e `pre-push` o chamam diretamente.
 
@@ -114,9 +117,9 @@ Substitui ESLint e Prettier. Configuração compartilhada em `packages/biome-con
 
 | Hook | O que faz |
 |---|---|
-| `pre-commit` | `lint-staged` (Biome check + write nos arquivos staged) → TruffleHog nos arquivos staged → Semgrep SAST |
+| `pre-commit` | `lint-staged` (Biome check + write nos arquivos staged) → TruffleHog nos arquivos staged → Semgrep SAST via Docker nos arquivos staged |
 | `commit-msg` | `commitlint` com config gitmoji — rejeita commits fora do padrão |
-| `pre-push` | TruffleHog no range de commits do push → `turbo run build test:e2e` — bloqueia o push se qualquer etapa falhar |
+| `pre-push` | TruffleHog no range de commits do push → Semgrep SAST via Docker nos arquivos alterados no push → `turbo run build check-types test:e2e` — bloqueia o push se qualquer etapa falhar |
 
 ### Formato de commits
 
