@@ -10,24 +10,25 @@ done < "$REPO_ROOT/config/semgrep-rules.txt"
 
 while IFS=' ' read -r local_ref local_sha remote_ref remote_sha; do
   [ "$local_sha" = "0000000000000000000000000000000000000000" ] && continue
+
   if [ -z "$remote_sha" ] || [ "$remote_sha" = "0000000000000000000000000000000000000000" ]; then
     base=$(git merge-base "$local_sha" origin/HEAD 2>/dev/null) || true
     if [ -n "$base" ]; then
       changed_files=$(git diff --name-only --diff-filter=d "$base" "$local_sha")
+      [ -z "$changed_files" ] && continue
+      scan_target=$(echo "$changed_files" | tr '\n' ' ')
     else
-      changed_files=$(git ls-files)
+      scan_target="."
     fi
   else
     changed_files=$(git diff --name-only --diff-filter=d "$remote_sha" "$local_sha")
+    [ -z "$changed_files" ] && continue
+    scan_target=$(echo "$changed_files" | tr '\n' ' ')
   fi
-
-  [ -z "$changed_files" ] && continue
-
-  file_args=$(echo "$changed_files" | tr '\n' ' ')
 
   MSYS_NO_PATHCONV=1 docker run --rm \
     -v "$REPO_ROOT:/src" \
     -w /src \
     semgrep/semgrep \
-    sh -c "semgrep scan --error$rules $file_args"
+    sh -c "semgrep scan --error$rules $scan_target"
 done
