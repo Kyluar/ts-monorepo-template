@@ -1,11 +1,11 @@
-import { 
-  argument, 
-  type BuildArg, 
-  type Container, 
-  dag, 
-  type Directory, 
-  object, 
-  func 
+import {
+  argument,
+  type BuildArg,
+  type Container,
+  dag,
+  type Directory,
+  object,
+  func
 } from "@dagger.io/dagger";
 
 import { IUtils } from "./interfaces"
@@ -15,53 +15,36 @@ export class Utils implements IUtils {
 
   /**
    * Class with utility functions for other modules
-   * @param source path of the monorepo's root 
+   * @param source path of the monorepo's root
    */
   constructor(
-    @argument({ 
-      defaultPath: "../../", ignore: ["**/.next", "**/node_modules", "**/.turbo", "**/dist", "**/coverage"] 
+    @argument({
+      defaultPath: "../../", ignore: ["**/.next", "**/node_modules", "**/.turbo", "**/dist", "**/coverage"]
     })
     source: Directory
   ){
     this.source = source
   }
 
-  @func()
-  async getNodeVersion(): Promise<string> {
-    try {
-      return await this.source.file(".nvmrc").contents();
-    } catch (error) {
-      throw new Error(`Failed to extract node version:\n${error}`);
-    }
-  }
-
-  @func()
-  async getPnpmVersion(): Promise<string> {
-    try {
-      const packageJson = JSON.parse(
-        await this.source.file("package.json").contents()
-      );
-
-      const pnpmFullString = packageJson.packageManager || packageJson.engines?.pnpm;
-  
-      if (!pnpmFullString) {
-        throw new Error("pnpm version not found in package.json (checked packageManager and engines)");
-      }
-  
-      const version = pnpmFullString.includes("@") 
-        ? pnpmFullString.split("@")[1] 
-        : pnpmFullString;
-  
-      return version;
-    } catch (error) {
-      throw new Error(`Failed to extract pnpm version:\n${error}`);
-    }
+  private resolveVersions() {
+    return Promise.all([
+      this.source.file(".nvmrc").contents().catch(e => {
+        throw new Error(`Failed to extract node version:\n${e}`)
+      }),
+      this.source.file("package.json").contents().then(raw => {
+        const pkg = JSON.parse(raw)
+        const v = pkg.packageManager ?? pkg.engines?.pnpm
+        if (!v) throw new Error("pnpm version not found in package.json (checked packageManager and engines)")
+        return v.includes("@") ? v.split("@")[1] : v
+      }).catch(e => {
+        throw new Error(`Failed to extract pnpm version:\n${e}`)
+      })
+    ])
   }
 
   async nodeContainer(distribution='alpine3.23'): Promise<Container> {
 
-    const nodeVersion: string = await this.getNodeVersion()
-    const pnpmVersion: string = await this.getPnpmVersion()
+    const [nodeVersion, pnpmVersion] = await this.resolveVersions()
     const libs = ["git"]
     const imageName = `node:${nodeVersion}-${distribution}`
 
@@ -118,15 +101,11 @@ export class Utils implements IUtils {
     dockerfile: string
   ): Promise<Container> {
 
+    const [nodeVersion, pnpmVersion] = await this.resolveVersions()
+
     const buildArgs: BuildArg[] = [
-      {
-        name: 'NODE_VERSION',
-        value: await this.getNodeVersion()
-      },
-      {
-        name: 'PNPM_VERSION',
-        value: await this.getPnpmVersion()
-      }
+      { name: 'NODE_VERSION', value: nodeVersion },
+      { name: 'PNPM_VERSION', value: pnpmVersion }
     ]
 
     return this.source.dockerBuild({ dockerfile, buildArgs })
