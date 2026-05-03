@@ -6,11 +6,11 @@ while IFS=' ' read -r local_ref local_sha remote_ref remote_sha; do
   if [ -z "$remote_sha" ] || [ "$remote_sha" = "0000000000000000000000000000000000000000" ]; then
     base=$(git merge-base "$local_sha" origin/HEAD 2>/dev/null) || true
     if [ -n "$base" ]; then
-      trufflehog git file://. --since-commit "$base" --results=verified,unknown --fail
+      trufflehog git file://. --no-update --since-commit "$base" --results=verified,unknown --fail
     else
-      trufflehog git file://. --results=verified,unknown --fail
+      trufflehog git file://. --no-update --results=verified,unknown --fail
     fi
   else
-    trufflehog git file://. --since-commit "$remote_sha" --results=verified,unknown --fail
+    trufflehog git file://. --no-update --since-commit "$remote_sha" --results=verified,unknown --fail
   fi
 done
