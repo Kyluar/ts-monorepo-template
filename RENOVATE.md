@@ -90,7 +90,7 @@
  ▎ Digest pinning garante imutabilidade — uma tag pode ser sobrescrita no registry,
  ▎ um digest não. O Renovate atualiza os digests automaticamente via customManagers.
 
- 2. ci/src/index.ts — Adicionar import de Secret, IMAGES e função renovate
+ 2. [✓] ci/src/index.ts — Adicionar import de Secret, IMAGES e função renovate
 
  Adicionar Secret e import de IMAGES:
  import { argument, check, dag, type Directory, type Secret, object, func } from

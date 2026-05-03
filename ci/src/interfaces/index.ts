@@ -1,4 +1,4 @@
-import { type Directory, type File } from "@dagger.io/dagger"
+import { type Directory, type File, type Secret } from "@dagger.io/dagger"
 
 export interface ICiModule {
     /**
@@ -34,6 +34,13 @@ export interface ICiModule {
      * @param to The ending git reference (defaults to "HEAD").
      */
     commitlintRange(from: string, to?: string): Promise<string>
+
+    /**
+     * Runs Renovate Bot to update dependencies via the Dagger container
+     * @param token GitHub PAT with repo and issues:write scopes
+     * @param repository repository in "owner/repo" format
+     */
+    renovate(token: Secret, repository: string): Promise<void>
 
     /**
      * Builds and publishs an app from the monorepo (Dockerfile required)
