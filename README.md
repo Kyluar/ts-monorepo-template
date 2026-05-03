@@ -6,19 +6,68 @@
 
 Template de base para aplicações web — monorepo pnpm + Turborepo com Next.js, testes (Vitest + Playwright), CI via Dagger e qualidade de código com Biome. Pronto para começar com XP: TDD, trunk-based git e commits convencionais.
 
-## Visão geral
+## Estrutura do projeto
 
-Este template inclui, de saída:
+```mermaid
+graph TD
+  subgraph Apps
+    E2E["apps/web-e2e · Playwright"]
+    WEB["apps/web · Next.js 16"]
+  end
+  subgraph Packages
+    UI["@repo/ui"]
+    subgraph Tooling["Shared Tooling"]
+      TS["@repo/typescript-config"]
+      VITEST["@repo/vitest-config"]
+      BIOME["@repo/biome-config"]
+    end
+  end
 
-- **Next.js 16** (App Router, React 19, TypeScript strict) em `apps/web`
-- **Biblioteca de componentes** compartilhada em `packages/ui` (`@repo/ui`)
-- **Testes unitários/integração** com Vitest + Testing Library (`happy-dom`)
-- **Testes E2E** com Playwright em `apps/web-e2e` (Chromium, Firefox, WebKit)
-- **Cobertura** de testes com `@vitest/coverage-v8`
-- **Biome** como linter e formatter (substitui ESLint + Prettier)
-- **Husky** com hooks `pre-commit` (lint-staged + TruffleHog + Semgrep), `commit-msg` (commitlint) e `pre-push` (TruffleHog + build + E2E)
-- **Commits** no formato gitmoji conventional (enforced via commitizen + commitlint)
-- **CI** com GitHub Actions + Dagger: qualidade de código, build, commitlint, cobertura, E2E e security scanning (Semgrep + TruffleHog)
+  E2E -->|testa| WEB
+  WEB --> UI
+  WEB & UI --> VITEST
+  WEB & UI & E2E --> TS
+  WEB & UI & E2E --> BIOME
+  VITEST --> TS & BIOME
+```
+
+## Quick Start
+
+<details>
+<summary>🐳 Docker (recomendado)</summary>
+
+```sh
+git clone <url-do-repo> && cd ts-monorepo-template
+make build
+make up
+```
+
+App disponível em `http://localhost:3000`.
+
+</details>
+
+<details>
+<summary>💻 Local (dev)</summary>
+
+```sh
+git clone <url-do-repo> && cd ts-monorepo-template
+pnpm install
+pnpm dev
+```
+
+App disponível em `http://localhost:3000`.
+
+</details>
+
+## Features
+
+| Área | O que resolve |
+|---|---|
+| **Zero-config tooling** | Biome (lint + format), TypeScript strict e Vitest pré-configurados e compartilhados entre todos os packages |
+| **Testes em todas as camadas** | Unit/integração com Vitest + Testing Library e E2E cross-browser com Playwright |
+| **CI production-ready** | GitHub Actions + Dagger: build, testes, commitlint, cobertura, Semgrep SAST e TruffleHog |
+| **Segurança desde o commit** | Hooks `pre-commit` e `pre-push` bloqueiam secrets e vulnerabilidades antes de chegar ao remoto |
+| **Commits à prova de falha** | Commitizen + commitlint enforçam gitmoji conventional em todo o time |
 
 ## Pré-requisitos
 
@@ -142,6 +191,6 @@ Seis workflows em `.github/workflows/`:
 |---|---|---|
 | `check.yml` | PRs para `main` | Qualidade de código + build (via Dagger) |
 | `tests.yml` | PRs para `main` | Testes unitários + cobertura (artifact 30 dias) e E2E completo (todos os browsers); faz upload do report Playwright em falha (via Dagger) |
-| `pr_commit_lint.yml` | PRs para `main` (exceto Dependabot) | Lint do título e range de commits do PR (via Dagger) |
+| `commitlint.yml` | PRs para `main` (exceto Dependabot) | Lint do título e range de commits do PR (via Dagger) |
 | `security.yml` | PRs para `main` | Semgrep SAST (com upload SARIF para GitHub Code Scanning) + TruffleHog secret scan (via Dagger) |
 | `dependabot-auto-merge.yml` | PRs do Dependabot para `main` | Aprova e habilita squash-merge automático para atualizações minor/patch |

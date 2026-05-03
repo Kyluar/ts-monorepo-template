@@ -1,4 +1,4 @@
-name: Commitlint
+name: Validate Commits
 
 on:
   pull_request:
@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   commitlint:
-    name: "Commitlint"
+    name: "Lint PR Title & Commits"
     if: github.actor != 'dependabot[bot]'
     runs-on: ubuntu-24.04
     timeout-minutes: 10
