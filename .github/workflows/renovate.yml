@@ -4,6 +4,12 @@ on:
   schedule:
     - cron: '0 6 * * 1'
   workflow_dispatch:
+    inputs:
+      dry-run:
+        description: "Run in dry-run mode (no PRs created)"
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   renovate:
@@ -24,6 +30,6 @@ jobs:
         with:
           version: "latest"
           verb: call
-          args: renovate --token=env:RENOVATE_TOKEN --repository=${{ github.repository }}
+          args: renovate --token=env:RENOVATE_TOKEN --repository=${{ github.repository }} --dry-run=${{ inputs.dry-run || false }}
         env:
           RENOVATE_TOKEN: ${{ secrets.RENOVATE_TOKEN }}
