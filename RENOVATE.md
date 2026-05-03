@@ -122,7 +122,7 @@
  Substituir o valor padrão do parâmetro da função nodeContainer:
  async nodeContainer(distribution = NODE_ALPINE_DISTRIBUTION): Promise<Container> {
 
- 4. renovate.json — Config na raiz do repo
+ 4. [✓] renovate.json — Config na raiz do repo
 
  {
    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
@@ -185,7 +185,7 @@
    ]
  }
 
- 5. .github/workflows/renovate.yml — Workflow agendado
+ 5. [✓] .github/workflows/renovate.yml — Workflow agendado
 
  name: Renovate
 

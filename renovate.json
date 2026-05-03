@@ -1,0 +1,62 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "dependencyDashboard": true,
+  "schedule": ["before 8am on Monday"],
+  "prConcurrentLimit": 3,
+  "automergeType": "pr",
+  "commitMessage": "🏗️ build(deps): update {{{depName}}} from {{{currentVersion}}} to {{{newVersion}}}",
+  "customManagers": [
+    {
+      "customType": "regex",
+      "fileMatch": ["^\\.nvmrc$"],
+      "matchStrings": ["(?<currentValue>[\\d\\.]+)"],
+      "depNameTemplate": "node",
+      "datasourceTemplate": "node-version"
+    },
+    {
+      "customType": "regex",
+      "fileMatch": ["^ci/src/images\\.ts$"],
+      "matchStrings": ["\"(?<depName>[^@\"]+)@sha256:(?<currentDigest>[a-f0-9]+)\""],
+      "datasourceTemplate": "docker",
+      "versioningTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "fileMatch": ["^ci/utils/src/images\\.ts$"],
+      "matchStrings": [
+        "// renovate: datasource=(?<datasource>[a-z-]+) depName=(?<depName>[^\\n]+)\\nexport const \\w+ = \"(?<currentValue>[^\"]+)\""
+      ],
+      "versioningTemplate": "docker"
+    }
+  ],
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["patch", "minor"],
+      "automerge": true
+    },
+    {
+      "matchUpdateTypes": ["major"],
+      "automerge": false,
+      "dependencyDashboardApproval": true
+    },
+    {
+      "groupName": "react",
+      "matchPackageNames": ["react", "react-dom", "@types/react", "@types/react-dom"],
+      "prTitle": "🏗️ build(deps): update react packages"
+    },
+    {
+      "matchFileNames": ["ci/src/images.ts"],
+      "automerge": false,
+      "dependencyDashboardApproval": true,
+      "description": "Imagens de segurança (semgrep, trufflehog) requerem aprovação manual"
+    },
+    {
+      "matchPackageNames": ["node"],
+      "automerge": false,
+      "dependencyDashboardApproval": true,
+      "groupName": "runtime versions",
+      "description": "Agrupa .nvmrc e engines.node no mesmo PR — ambos requerem aprovação manual"
+    }
+  ]
+}
