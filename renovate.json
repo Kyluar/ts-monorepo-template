@@ -28,6 +28,13 @@
         "// renovate: datasource=(?<datasource>[a-z-]+) depName=(?<depName>[^\\n]+)\\nexport const \\w+ = \"(?<currentValue>[^\"]+)\""
       ],
       "versioningTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "fileMatch": ["^package\\.json$"],
+      "matchStrings": ["\"packageManager\":\\s*\"pnpm@(?<currentValue>[^\"]+)\""],
+      "depNameTemplate": "pnpm",
+      "datasourceTemplate": "npm"
     }
   ],
   "packageRules": [
@@ -52,11 +59,11 @@
       "description": "Imagens de segurança (semgrep, trufflehog) requerem aprovação manual"
     },
     {
-      "matchPackageNames": ["node"],
+      "matchPackageNames": ["node", "pnpm"],
       "automerge": false,
       "dependencyDashboardApproval": true,
       "groupName": "runtime versions",
-      "description": "Agrupa .nvmrc e engines.node no mesmo PR — ambos requerem aprovação manual"
+      "description": "Agrupa .nvmrc, engines.node e packageManager pnpm no mesmo PR — requerem aprovação manual"
     }
   ]
 }
