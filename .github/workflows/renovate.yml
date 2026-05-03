@@ -30,6 +30,6 @@ jobs:
         with:
           version: "latest"
           verb: call
-          args: renovate --token=env:RENOVATE_TOKEN --repository=${{ github.repository }} --dry-run=${{ inputs.dry-run || false }} --git-author=${{ vars.RENOVATE_GIT_AUTHOR }}
+          args: renovate --token=env:RENOVATE_TOKEN --repository=${{ github.repository }} --dry-run=${{ inputs.dry-run || false }} --git-author='${{ vars.RENOVATE_GIT_AUTHOR }}'
         env:
           RENOVATE_TOKEN: ${{ secrets.RENOVATE_TOKEN }}
