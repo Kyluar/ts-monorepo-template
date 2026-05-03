@@ -40,8 +40,9 @@ export interface ICiModule {
      * @param token GitHub PAT with repo and issues:write scopes
      * @param repository repository in "owner/repo" format
      * @param dryRun simulate without creating PRs (default=false)
+     * @param gitAuthor git author in "Name <email>" format for Renovate commits
      */
-    renovate(token: Secret, repository: string, dryRun?: boolean): Promise<void>
+    renovate(token: Secret, repository: string, dryRun: boolean, gitAuthor: Secret): Promise<void>
 
     /**
      * Builds and publishs an app from the monorepo (Dockerfile required)
