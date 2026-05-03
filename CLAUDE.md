@@ -108,7 +108,7 @@ ci/             # Dagger CI module (TypeScript)
   - `tests.yml` — two jobs: `fastTests` (unit + coverage, uploads coverage artifact with 30-day retention) and `e2eTests` (full cross-browser E2E, uploads Playwright reports on failure)
   - `commitlint.yml` (`Validate Commits`) — lints PR title and commit range with commitlint via Dagger on all PRs
   - `security.yml` — two jobs: Semgrep SAST (`semgrep-scan`, outputs SARIF uploaded to GitHub Code Scanning) + TruffleHog secret scan (`trufflehog-scan`) on PRs
-  - `renovate.yml` — runs Renovate via Dagger on a schedule (Mondays 6am) and on `workflow_dispatch`; requires `RENOVATE_TOKEN` secret (PAT with `repo` + `issues:write`)
+  - `renovate.yml` — runs Renovate via Dagger on a schedule (Mondays 6am) and on `workflow_dispatch`; requires `RENOVATE_TOKEN` secret (PAT with `repo` + `issues:write`) and `RENOVATE_GIT_AUTHOR` Actions variable (e.g. `Renovate Bot <bot@domain.com>`) — without it Renovate uses Mend's default email which GitHub flags as Unverified
 - The `buildAndPublishApp` function builds a Dockerfile from `apps/<app>/Dockerfile` and publishes to ttl.sh with a tag `<branch>-<app>-<commitId>`
 
 ### Tooling

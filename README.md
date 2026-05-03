@@ -79,6 +79,7 @@ App disponível em `http://localhost:3000`.
 | Dagger CLI | qualquer |
 | TruffleHog | qualquer (CLI nativo) |
 | `RENOVATE_TOKEN` (GitHub PAT) | — |
+| `RENOVATE_GIT_AUTHOR` (Actions variable) | — |
 
 > Instale o pnpm com `corepack enable && corepack prepare pnpm@10.33.0 --activate`.
 
@@ -89,6 +90,8 @@ App disponível em `http://localhost:3000`.
 > Instale o TruffleHog com `brew install trufflehog` (macOS/Linux), `choco install trufflehog` (Windows) ou via [GitHub Releases](https://github.com/trufflesecurity/trufflehog/releases). O binário `trufflehog` deve estar no `PATH` — os hooks `pre-commit` e `pre-push` o chamam diretamente.
 
 > Crie um GitHub **fine-grained PAT** com as permissões: `Contents` (read & write), `Pull Requests` (read & write), `Workflows` (read & write), `Issues` (read & write), `Commit Statuses` (read-only) e `Metadata` (read-only). Salve como secret `RENOVATE_TOKEN` em **Settings → Secrets and variables → Actions** do repositório. O `GITHUB_TOKEN` padrão não funciona porque PRs criados por ele não disparam workflows de CI.
+
+> Defina a variável de Actions `RENOVATE_GIT_AUTHOR` em **Settings → Secrets and variables → Actions → Variables** com o autor Git que o Renovate usará nos commits (ex: `Renovate Bot <bot@seudominio.com>`). Sem isso, o Renovate usa o email padrão da Mend (`renovate@whitesourcesoftware.com`), que o GitHub marca como `Unverified` por causa do Vigilant Mode.
 
 ## Instalação e execução local
 

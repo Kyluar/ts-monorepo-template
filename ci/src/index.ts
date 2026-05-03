@@ -107,11 +107,13 @@ export class CiModule implements ICiModule {
   }
 
   @func()
-  async renovate(token: Secret, repository: string, dryRun = false): Promise<void> {
-    const base = dag.container()
+  async renovate(token: Secret, repository: string, dryRun = false, gitAuthor = ""): Promise<void> {
+    let base = dag.container()
       .from(IMAGES.renovate)
       .withSecretVariable("RENOVATE_TOKEN", token)
       .withEnvVariable("RENOVATE_REPOSITORIES", repository)
+
+    if (gitAuthor) base = base.withEnvVariable("RENOVATE_GIT_AUTHOR", gitAuthor)
 
     await (dryRun ? base.withEnvVariable("RENOVATE_DRY_RUN", "full") : base)
       .withExec([])
