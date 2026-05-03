@@ -66,7 +66,7 @@
  ---
  Implementação
 
- 1. ci/src/images.ts e ci/utils/src/images.ts — Centralizar imagens com digest pinning
+ 1. [✓] ci/src/images.ts e ci/utils/src/images.ts — Centralizar imagens com digest pinning
 
  Obter os digests das imagens atuais (rodar localmente):
  docker pull semgrep/semgrep && docker inspect semgrep/semgrep --format '{{index .RepoDigests 0}}'
