@@ -67,6 +67,11 @@
       "dependencyDashboardApproval": true,
       "groupName": "runtime versions",
       "description": "Agrupa .nvmrc, engines.node e packageManager pnpm no mesmo PR — requerem aprovação manual"
+    },
+    {
+      "matchFileNames": ["ci/package.json", "ci/utils/package.json"],
+      "matchPackageNames": ["typescript"],
+      "enabled": false
     }
   ]
 }
