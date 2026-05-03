@@ -65,7 +65,7 @@ App disponível em `http://localhost:3000`.
 |---|---|
 | **Zero-config tooling** | Biome (lint + format), TypeScript strict e Vitest pré-configurados e compartilhados entre todos os packages |
 | **Testes em todas as camadas** | Unit/integração com Vitest + Testing Library e E2E cross-browser com Playwright |
-| **CI production-ready** | GitHub Actions + Dagger: build, testes, commitlint, cobertura, Semgrep SAST e TruffleHog |
+| **CI production-ready** | GitHub Actions + Dagger: build, testes, commitlint, cobertura, Semgrep SAST, TruffleHog e Renovate para atualização automática de dependências |
 | **Segurança desde o commit** | Hooks `pre-commit` e `pre-push` bloqueiam secrets e vulnerabilidades antes de chegar ao remoto |
 | **Commits à prova de falha** | Commitizen + commitlint enforçam gitmoji conventional em todo o time |
 
@@ -78,6 +78,7 @@ App disponível em `http://localhost:3000`.
 | Docker | qualquer |
 | Dagger CLI | qualquer |
 | TruffleHog | qualquer (CLI nativo) |
+| `RENOVATE_TOKEN` (GitHub PAT) | — |
 
 > Instale o pnpm com `corepack enable && corepack prepare pnpm@10.33.0 --activate`.
 
@@ -86,6 +87,8 @@ App disponível em `http://localhost:3000`.
 > Docker é necessário para os hooks locais de SAST (`pre-commit` e `pre-push`) e para os comandos `make`. As rulesets do Semgrep estão definidas em `config/semgrep-rules.txt`.
 
 > Instale o TruffleHog com `brew install trufflehog` (macOS/Linux), `choco install trufflehog` (Windows) ou via [GitHub Releases](https://github.com/trufflesecurity/trufflehog/releases). O binário `trufflehog` deve estar no `PATH` — os hooks `pre-commit` e `pre-push` o chamam diretamente.
+
+> Crie um GitHub **fine-grained PAT** com as permissões: `Contents` (read & write), `Pull Requests` (read & write), `Workflows` (read & write), `Issues` (read & write), `Commit Statuses` (read-only) e `Metadata` (read-only). Salve como secret `RENOVATE_TOKEN` em **Settings → Secrets and variables → Actions** do repositório. O `GITHUB_TOKEN` padrão não funciona porque PRs criados por ele não disparam workflows de CI.
 
 ## Instalação e execução local
 
@@ -185,12 +188,12 @@ Use `pnpm commit` para o assistente interativo ou escreva manualmente seguindo o
 
 ## CI
 
-Seis workflows em `.github/workflows/`:
+Cinco workflows em `.github/workflows/`:
 
 | Workflow | Trigger | O que faz |
 |---|---|---|
 | `check.yml` | PRs para `main` | Qualidade de código + build (via Dagger) |
 | `tests.yml` | PRs para `main` | Testes unitários + cobertura (artifact 30 dias) e E2E completo (todos os browsers); faz upload do report Playwright em falha (via Dagger) |
-| `commitlint.yml` | PRs para `main` (exceto Dependabot) | Lint do título e range de commits do PR (via Dagger) |
+| `commitlint.yml` | PRs para `main` | Lint do título e range de commits do PR (via Dagger) |
 | `security.yml` | PRs para `main` | Semgrep SAST (com upload SARIF para GitHub Code Scanning) + TruffleHog secret scan (via Dagger) |
-| `dependabot-auto-merge.yml` | PRs do Dependabot para `main` | Aprova e habilita squash-merge automático para atualizações minor/patch |
+| `renovate.yml` | Agendado (segundas, 6h) + manual | Executa o Renovate via Dagger para atualização automática de dependências |
