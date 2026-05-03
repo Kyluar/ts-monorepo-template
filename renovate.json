@@ -5,7 +5,10 @@
   "schedule": ["before 8am on Monday"],
   "prConcurrentLimit": 3,
   "automergeType": "pr",
-  "commitMessage": "🏗️ build(deps): update {{{depName}}} from {{{currentVersion}}} to {{{newVersion}}}",
+  "commitMessagePrefix": "🏗️ build(deps):",
+  "commitMessageAction": "update",
+  "commitMessageTopic": "{{{depName}}}",
+  "commitMessageExtra": "from {{{currentVersion}}} to {{{newVersion}}}",
   "customManagers": [
     {
       "customType": "regex",
@@ -17,7 +20,7 @@
     {
       "customType": "regex",
       "fileMatch": ["^ci/src/images\\.ts$"],
-      "matchStrings": ["\"(?<depName>[^@\"]+)@sha256:(?<currentDigest>[a-f0-9]+)\""],
+      "matchStrings": ["\"(?<depName>[^@:\"]+):(?<currentValue>[^@\"]+)@sha256:(?<currentDigest>[a-f0-9]+)\""],
       "datasourceTemplate": "docker",
       "versioningTemplate": "docker"
     },
@@ -50,7 +53,7 @@
     {
       "groupName": "react",
       "matchPackageNames": ["react", "react-dom", "@types/react", "@types/react-dom"],
-      "prTitle": "🏗️ build(deps): update react packages"
+      "commitMessageTopic": "react packages"
     },
     {
       "matchFileNames": ["ci/src/images.ts"],
