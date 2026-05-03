@@ -114,7 +114,7 @@
 
  ▎ Renovate clona o repo via token — não precisa montar this.source.
 
- 3. ci/utils/src/index.ts — Importar NODE_ALPINE_DISTRIBUTION
+ 3. [✓] ci/utils/src/index.ts — Importar NODE_ALPINE_DISTRIBUTION
 
  Adicionar import no topo do arquivo:
  import { NODE_ALPINE_DISTRIBUTION } from "./images";

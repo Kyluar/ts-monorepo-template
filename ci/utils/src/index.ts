@@ -8,6 +8,7 @@ import {
   func
 } from "@dagger.io/dagger";
 
+import { NODE_ALPINE_DISTRIBUTION } from "./images"
 import { IUtils } from "./interfaces"
 @object()
 export class Utils implements IUtils {
@@ -42,7 +43,7 @@ export class Utils implements IUtils {
     ])
   }
 
-  async nodeContainer(distribution='alpine3.23'): Promise<Container> {
+  async nodeContainer(distribution = NODE_ALPINE_DISTRIBUTION): Promise<Container> {
 
     const [nodeVersion, pnpmVersion] = await this.resolveVersions()
     const libs = ["git"]
