@@ -103,12 +103,12 @@ ci/             # Dagger CI module (TypeScript)
 ### CI (`ci/`)
 
 - Written in TypeScript using the Dagger SDK (`@dagger.io/dagger`)
-- Six GitHub Actions workflows in `.github/workflows/`:
+- Five GitHub Actions workflows in `.github/workflows/`:
   - `check.yml` — runs `codeQuality` + `buildProject` Dagger checks on PRs to `main`
   - `tests.yml` — two jobs: `fastTests` (unit + coverage, uploads coverage artifact with 30-day retention) and `e2eTests` (full cross-browser E2E, uploads Playwright reports on failure)
-  - `commitlint.yml` (`Validate Commits`) — lints PR title and commit range with commitlint via Dagger (skipped for Dependabot PRs)
+  - `commitlint.yml` (`Validate Commits`) — lints PR title and commit range with commitlint via Dagger on all PRs
   - `security.yml` — two jobs: Semgrep SAST (`semgrep-scan`, outputs SARIF uploaded to GitHub Code Scanning) + TruffleHog secret scan (`trufflehog-scan`) on PRs
-  - `dependabot-auto-merge.yml` — auto-approves and squash-merges Dependabot minor/patch PRs via GitHub CLI
+  - `renovate.yml` — runs Renovate via Dagger on a schedule (Mondays 6am) and on `workflow_dispatch`; requires `RENOVATE_TOKEN` secret (PAT with `repo` + `issues:write`)
 - The `buildAndPublishApp` function builds a Dockerfile from `apps/<app>/Dockerfile` and publishes to ttl.sh with a tag `<branch>-<app>-<commitId>`
 
 ### Tooling

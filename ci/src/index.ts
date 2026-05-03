@@ -4,11 +4,13 @@ import {
   dag,
   type Directory,
   type File,
+  type Secret,
   object,
   func
 } from "@dagger.io/dagger";
 
 import { ICiModule } from "./interfaces";
+import { IMAGES } from "./images";
 
 @object()
 export class CiModule implements ICiModule {
@@ -51,7 +53,7 @@ export class CiModule implements ICiModule {
     const ruleSet = rules.map(str => `--config p/${str}`).join(" ")
     return dag
     .container()
-    .from("semgrep/semgrep")
+    .from(IMAGES.semgrep)
     .withMountedDirectory("/src", this.source)
     .withWorkdir("/src")
     .withExec(
@@ -65,7 +67,7 @@ export class CiModule implements ICiModule {
     const args = `--since-commit ${sinceCommit} --results=verified,unknown --fail`
     return dag
     .container()
-    .from("trufflesecurity/trufflehog:3.94.3")
+    .from(IMAGES.trufflehog)
     .withMountedDirectory("/src", this.source)
     .withWorkdir("/src")
     .withExec(
@@ -102,6 +104,17 @@ export class CiModule implements ICiModule {
     return await dag.utils({source: this.source}).baseEnvironment()
       .withExec(["pnpm", "commitlint", "--from", from, "--to", to, "--verbose"])
       .stdout()
+  }
+
+  @func()
+  async renovate(token: Secret, repository: string, dryRun = false): Promise<void> {
+    await dag.container()
+      .from(IMAGES.renovate)
+      .withSecretVariable("RENOVATE_TOKEN", token)
+      .withEnvVariable("RENOVATE_REPOSITORIES", repository)
+      .withEnvVariable("RENOVATE_DRY_RUN", dryRun ? "full" : "disabled")
+      .withExec([])
+      .sync()
   }
 
   @func()
