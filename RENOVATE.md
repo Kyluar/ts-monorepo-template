@@ -35,17 +35,19 @@
  ---
  Arquivos a modificar
 
- ┌──────────────────────────────────────┬──────────────────────────────────────────────────┐
- │               Arquivo                │                    Operação                      │
- ├──────────────────────────────────────┼──────────────────────────────────────────────────┤
- │ ci/src/index.ts                      │ Adicionar função renovate() + migrar .from()     │
- ├──────────────────────────────────────┼──────────────────────────────────────────────────┤
- │ ci/utils/src/index.ts                │ Importar NODE_ALPINE_DISTRIBUTION de images.ts   │
- ├──────────────────────────────────────┼──────────────────────────────────────────────────┤
- │ .github/workflows/pr_commit_lint.yml │ Remover condicional de autoria (dependabot[bot]) │
- ├──────────────────────────────────────┼──────────────────────────────────────────────────┤
- │ .github/dependabot.yml               │ Remover (Renovate cobre tudo)                    │
- └──────────────────────────────────────┴──────────────────────────────────────────────────┘
+ ┌─────────────────────────────────────────────┬──────────────────────────────────────────────────┐
+ │                   Arquivo                   │                    Operação                      │
+ ├─────────────────────────────────────────────┼──────────────────────────────────────────────────┤
+ │ ci/src/index.ts                             │ Adicionar função renovate() + migrar .from()     │
+ ├─────────────────────────────────────────────┼──────────────────────────────────────────────────┤
+ │ ci/utils/src/index.ts                       │ Importar NODE_ALPINE_DISTRIBUTION de images.ts   │
+ ├─────────────────────────────────────────────┼──────────────────────────────────────────────────┤
+ │ .github/workflows/commitlint.yml            │ Remover condicional de autoria (dependabot[bot]) │
+ ├─────────────────────────────────────────────┼──────────────────────────────────────────────────┤
+ │ .github/workflows/dependabot-auto-merge.yml │ Remover (Renovate substitui o Dependabot)        │
+ ├─────────────────────────────────────────────┼──────────────────────────────────────────────────┤
+ │ .github/dependabot.yml                      │ Remover (Renovate cobre tudo)                    │
+ └─────────────────────────────────────────────┴──────────────────────────────────────────────────┘
 
  Arquivos a criar
 
@@ -70,6 +72,9 @@
  docker pull semgrep/semgrep && docker inspect semgrep/semgrep --format '{{index .RepoDigests 0}}'
  docker pull trufflesecurity/trufflehog:3.94.3 && docker inspect trufflesecurity/trufflehog:3.94.3 --format '{{index .RepoDigests 0}}'
  docker pull ghcr.io/renovatebot/renovate:latest && docker inspect ghcr.io/renovatebot/renovate:latest --format '{{index .RepoDigests 0}}'
+
+ ▎ Preencher os digests obtidos substituindo os placeholders <digest-*> diretamente
+ ▎ em ci/src/images.ts antes de prosseguir para o passo 2.
 
  ci/src/images.ts:
  export const IMAGES = {
@@ -125,6 +130,7 @@
    "dependencyDashboard": true,
    "schedule": ["before 8am on Monday"],
    "prConcurrentLimit": 3,
+   "automergeType": "pr",
    "commitMessage": "🏗️ build(deps): update {{{depName}}} from {{{currentVersion}}} to {{{newVersion}}}",
    "customManagers": [
      {
@@ -211,7 +217,7 @@
          env:
            RENOVATE_TOKEN: ${{ secrets.RENOVATE_TOKEN }}
 
- 6. .github/workflows/pr_commit_lint.yml — Remover condicional de autoria
+ 6. .github/workflows/commitlint.yml — Remover condicional de autoria
 
  Remover a linha 15:
  if: github.actor != 'dependabot[bot]'
@@ -223,6 +229,10 @@
 
  Deletar o arquivo. Renovate cobre npm e github-actions nativamente via config:recommended.
 
+ 8. .github/workflows/dependabot-auto-merge.yml — Remover
+
+ Deletar o arquivo. Com o Dependabot removido, o workflow fica dead code.
+
  ---
  Verificação
 
@@ -232,3 +242,6 @@
  4. Dispatch manual: Executar "Run workflow" no GitHub → verificar que o Dagger container sobe e o Renovate roda
  5. Dependency Dashboard: Após primeira execução, confirmar que uma Issue "Dependency Dashboard" foi criada no repo
  6. Automerge flow: Em um PR de patch criado pelo Renovate, verificar que após CI passar o merge acontece automaticamente
+
+ ▎ Primeira execução: O Renovate pode criar vários PRs simultaneamente antes de atingir
+ ▎ prConcurrentLimit: 3 — comportamento esperado para o backlog inicial de atualizações.
