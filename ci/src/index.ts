@@ -107,11 +107,12 @@ export class CiModule implements ICiModule {
   }
 
   @func()
-  async renovate(token: Secret, repository: string): Promise<void> {
+  async renovate(token: Secret, repository: string, dryRun = false): Promise<void> {
     await dag.container()
       .from(IMAGES.renovate)
       .withSecretVariable("RENOVATE_TOKEN", token)
       .withEnvVariable("RENOVATE_REPOSITORIES", repository)
+      .withEnvVariable("RENOVATE_DRY_RUN", dryRun ? "full" : "disabled")
       .withExec([])
       .sync()
   }

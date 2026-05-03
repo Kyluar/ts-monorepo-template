@@ -39,8 +39,9 @@ export interface ICiModule {
      * Runs Renovate Bot to update dependencies via the Dagger container
      * @param token GitHub PAT with repo and issues:write scopes
      * @param repository repository in "owner/repo" format
+     * @param dryRun simulate without creating PRs (default=false)
      */
-    renovate(token: Secret, repository: string): Promise<void>
+    renovate(token: Secret, repository: string, dryRun?: boolean): Promise<void>
 
     /**
      * Builds and publishs an app from the monorepo (Dockerfile required)
