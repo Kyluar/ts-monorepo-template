@@ -5,6 +5,7 @@
   "schedule": ["before 8am on Monday"],
   "prConcurrentLimit": 3,
   "automergeType": "pr",
+  "platformAutomerge": true,
   "commitMessagePrefix": "🏗️ build(deps):",
   "commitMessageAction": "update",
   "commitMessageTopic": "{{{depName}}}",
