@@ -13,21 +13,27 @@
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["^\\.nvmrc$"],
+      "managerFilePatterns": [
+        "/^\\.nvmrc$/"
+      ],
       "matchStrings": ["(?<currentValue>[\\d\\.]+)"],
       "depNameTemplate": "node",
       "datasourceTemplate": "node-version"
     },
     {
       "customType": "regex",
-      "fileMatch": ["^ci/src/images\\.ts$"],
+      "managerFilePatterns": [
+        "/^ci/src/images\\.ts$/"
+      ],
       "matchStrings": ["\"(?<depName>[^@:\"]+):(?<currentValue>[^@\"]+)@sha256:(?<currentDigest>[a-f0-9]+)\""],
       "datasourceTemplate": "docker",
       "versioningTemplate": "docker"
     },
     {
       "customType": "regex",
-      "fileMatch": ["^ci/utils/src/images\\.ts$"],
+      "managerFilePatterns": [
+        "/^ci/utils/src/images\\.ts$/"
+      ],
       "matchStrings": [
         "// renovate: datasource=(?<datasource>[a-z-]+) depName=(?<depName>[^\\n]+)\\nexport const \\w+ = \"(?<currentValue>[^\"]+)\""
       ],
@@ -35,7 +41,9 @@
     },
     {
       "customType": "regex",
-      "fileMatch": ["^package\\.json$"],
+      "managerFilePatterns": [
+        "/^package\\.json$/"
+      ],
       "matchStrings": ["\"packageManager\":\\s*\"pnpm@(?<currentValue>[^\"]+)\""],
       "depNameTemplate": "pnpm",
       "datasourceTemplate": "npm"
