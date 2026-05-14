@@ -78,8 +78,9 @@ App disponível em `http://localhost:3000`.
 | Docker | qualquer |
 | Dagger CLI | qualquer |
 | TruffleHog | qualquer (CLI nativo) |
-| `RENOVATE_TOKEN` | — |
-| `RENOVATE_GIT_AUTHOR` (Actions variable) | — |
+| `RENOVATE_TOKEN` (Actions secret) | — |
+| `RENOVATE_GIT_AUTHOR` (Actions secret) | — |
+| `RENOVATE_USERNAME` (Actions variable) | — |
 
 > Instale o pnpm com `corepack enable && corepack prepare pnpm@10.33.0 --activate`.
 
@@ -89,7 +90,9 @@ App disponível em `http://localhost:3000`.
 
 > Instale o TruffleHog com `brew install trufflehog` (macOS/Linux), `choco install trufflehog` (Windows) ou via [GitHub Releases](https://github.com/trufflesecurity/trufflehog/releases). O binário `trufflehog` deve estar no `PATH` — os hooks `pre-commit` e `pre-push` o chamam diretamente.
 
-> Defina a variável de Actions `RENOVATE_GIT_AUTHOR` em **Settings → Secrets and variables → Actions → Variables** com o autor Git que o Renovate usará nos commits (ex: `Renovate Bot <bot@seudominio.com>`). Sem isso, o Renovate usa o email padrão da Mend (`renovate@whitesourcesoftware.com`), que a plataforma de hospedagem pode marcar como `Unverified`.
+> Defina o secret de Actions `RENOVATE_GIT_AUTHOR` em **Settings → Secrets and variables → Actions → Secrets** com o autor Git que o Renovate usará nos commits (ex: `Renovate Bot <seu@email.com>`). Tratado como secret para evitar exposição de email pessoal nos logs de CI. Sem isso, o Renovate usa o email padrão da Mend (`renovate@whitesourcesoftware.com`), que a plataforma de hospedagem pode marcar como `Unverified`.
+
+> Defina a variável de Actions `RENOVATE_USERNAME` em **Settings → Secrets and variables → Actions → Variables** com o username do Codeberg associado ao `RENOVATE_TOKEN`. O Renovate usa esse valor para filtrar PRs que ele mesmo criou via `poster=<username>` — sem ele, tenta usar `forgejo-actions`, um usuário que não existe na API pública do Codeberg.
 
 <details>
 <summary>🔑 RENOVATE_TOKEN</summary>
@@ -100,7 +103,7 @@ App disponível em `http://localhost:3000`.
 
 #### Codeberg
 
-> O workflow do Renovate no Codeberg usa o `GITHUB_TOKEN` provido automaticamente pelo Forgejo Actions — nenhum secret manual é necessário no repositório. Para **executar o Renovate localmente via Dagger CLI**, crie um **Codeberg PAT clássico** (sem restrição de repositório) em **Settings → Applications → Access Tokens** com os escopos: `read:user`, `read:organization`, `write:issue` e `write:repository`. O token **não pode ser scoped para um repositório específico** — o Renovate chama `/api/v1/user` e `/api/v1/orgs/{owner}` na inicialização, endpoints de nível de usuário inacessíveis por tokens com escopo de repositório.
+> Crie um **Codeberg PAT clássico** (sem restrição de repositório) em **Settings → Applications → Access Tokens** com os escopos: `read:user`, `read:organization`, `write:issue` e `write:repository`. Salve como secret `RENOVATE_TOKEN` em **Settings → Secrets and variables → Actions → Secrets** do repositório. O token **não pode ser scoped para um repositório específico** — o Renovate chama `/api/v1/user` e `/api/v1/orgs/{owner}` na inicialização, endpoints de nível de usuário inacessíveis por tokens com escopo de repositório. O mesmo token é usado pelo workflow de CI e para execução local via Dagger CLI.
 
 </details>
 

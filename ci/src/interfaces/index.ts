@@ -40,11 +40,12 @@ export interface ICiModule {
      * @param token PAT with repo and issues:write scopes
      * @param repository repository in "owner/repo" format
      * @param dryRun simulate without creating PRs (default=false)
-     * @param gitAuthor git author in "Name <email>" format for Renovate commits
+     * @param gitAuthor git author in "Name <email>" format for Renovate commits (treated as secret to avoid leaking personal email in logs)
      * @param platform git hosting platform (default="github")
      * @param endpoint base API URL for self-hosted or non-GitHub platforms (e.g. "https://codeberg.org/api/v1/")
+     * @param username username associated with the token — required for Renovate to find its own PRs via the platform API
      */
-    renovate(token: Secret, repository: string, dryRun: boolean, gitAuthor: Secret, platform?: string, endpoint?: string): Promise<void>
+    renovate(token: Secret, repository: string, dryRun: boolean, gitAuthor: Secret, platform?: string, endpoint?: string, username: string): Promise<void>
 
     /**
      * Builds and publishs an app from the monorepo (Dockerfile required)

@@ -49,8 +49,10 @@ jobs:
           --git-author=env:RENOVATE_GIT_AUTHOR
           --platform=forgejo
           --endpoint=https://codeberg.org/api/v1/
+          --username="$RENOVATE_USERNAME"
         env:
-          RENOVATE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RENOVATE_GIT_AUTHOR: ${{ vars.RENOVATE_GIT_AUTHOR }}
+          RENOVATE_TOKEN: ${{ secrets.RENOVATE_TOKEN }}
+          RENOVATE_GIT_AUTHOR: ${{ secrets.RENOVATE_GIT_AUTHOR }}
+          RENOVATE_USERNAME: ${{ vars.RENOVATE_USERNAME }}
           RENOVATE_REPOSITORY: ${{ github.repository }}
           RENOVATE_DRY_RUN: ${{ inputs.dry-run || false }}
