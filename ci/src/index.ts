@@ -10,7 +10,8 @@ import {
 } from "@dagger.io/dagger";
 
 import { ICiModule } from "./interfaces";
-import { IMAGES } from "./images";
+import { IMAGES } from "./images"
+import { RENOVATE_ALLOWED_COMMANDS } from "./renovate";
 
 @object()
 export class CiModule implements ICiModule {
@@ -119,6 +120,8 @@ export class CiModule implements ICiModule {
 
     if (endpoint) base = base.withEnvVariable("RENOVATE_ENDPOINT", endpoint)
     if (dryRun) base = base.withEnvVariable("RENOVATE_DRY_RUN", "full")
+
+    base = base.withEnvVariable("RENOVATE_ALLOWED_COMMANDS", JSON.stringify([...RENOVATE_ALLOWED_COMMANDS]))
 
     await base
       .withExec([])
