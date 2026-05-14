@@ -1,0 +1,48 @@
+name: Dagger Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [main]
+
+concurrency:
+  group: check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: "Code Quality & Build"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    env:
+      _EXPERIMENTAL_DAGGER_RUNNER_HOST: docker-container://dagger-engine-v0.20.6
+
+    steps:
+      - name: Setup
+        run: apt-get update -qq && apt-get install -y -qq --no-install-recommends git curl ca-certificates docker.io && update-ca-certificates
+
+      - name: Checkout
+        run: |
+          git init
+          git remote add origin "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}"
+          git fetch --depth=1 origin "${GITHUB_REF}"
+          git checkout FETCH_HEAD
+
+      - name: Install Dagger
+        run: |
+          curl -fsSL https://dl.dagger.io/dagger/install.sh | DAGGER_VERSION=v0.20.6 sh
+          echo "$GITHUB_WORKSPACE/bin" >> "$GITHUB_PATH"
+
+      - name: Debug
+        run: |
+          dagger version
+          echo "_EXPERIMENTAL_DAGGER_RUNNER_HOST=$_EXPERIMENTAL_DAGGER_RUNNER_HOST"
+          ls -la /var/run/docker.sock 2>/dev/null || echo "no socket"
+
+      - name: Code Quality
+        run: dagger call code-quality
+
+      - name: Build Project
+        run: dagger call build-project

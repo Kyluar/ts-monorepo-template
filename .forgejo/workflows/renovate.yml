@@ -1,0 +1,56 @@
+name: Renovate
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: "Run in dry-run mode (no PRs created)"
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  renovate:
+    name: "Renovate"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+    env:
+      _EXPERIMENTAL_DAGGER_RUNNER_HOST: docker-container://dagger-engine-v0.20.6
+
+    steps:
+      - name: Setup
+        run: apt-get update -qq && apt-get install -y -qq --no-install-recommends git curl ca-certificates docker.io && update-ca-certificates
+
+      - name: Checkout
+        run: |
+          git init
+          git remote add origin "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}"
+          git fetch --depth=1 origin "${GITHUB_REF:-HEAD}"
+          git checkout FETCH_HEAD
+
+      - name: Install Dagger
+        run: |
+          curl -fsSL https://dl.dagger.io/dagger/install.sh | DAGGER_VERSION=v0.20.6 sh
+          echo "$GITHUB_WORKSPACE/bin" >> "$GITHUB_PATH"
+
+      - name: Run Renovate
+        run: >-
+          dagger call
+          renovate
+          --token=env:RENOVATE_TOKEN
+          --repository="$RENOVATE_REPOSITORY"
+          --dry-run="$RENOVATE_DRY_RUN"
+          --git-author=env:RENOVATE_GIT_AUTHOR
+          --platform=forgejo
+          --endpoint=https://codeberg.org/api/v1/
+        env:
+          RENOVATE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RENOVATE_GIT_AUTHOR: ${{ vars.RENOVATE_GIT_AUTHOR }}
+          RENOVATE_REPOSITORY: ${{ github.repository }}
+          RENOVATE_DRY_RUN: ${{ inputs.dry-run || false }}

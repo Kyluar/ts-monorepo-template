@@ -1,0 +1,47 @@
+name: Validate Commits
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+    branches: [main]
+
+concurrency:
+  group: commitlint-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  commitlint:
+    name: "Lint PR Title & Commits"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    env:
+      _EXPERIMENTAL_DAGGER_RUNNER_HOST: docker-container://dagger-engine-v0.20.6
+
+    steps:
+      - name: Setup
+        run: apt-get update -qq && apt-get install -y -qq --no-install-recommends git curl ca-certificates docker.io && update-ca-certificates
+
+      - name: Checkout
+        run: |
+          git init
+          git remote add origin "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}"
+          git fetch origin
+          git checkout "${GITHUB_SHA}"
+
+      - name: Install Dagger
+        run: |
+          curl -fsSL https://dl.dagger.io/dagger/install.sh | DAGGER_VERSION=v0.20.6 sh
+          echo "$GITHUB_WORKSPACE/bin" >> "$GITHUB_PATH"
+
+      - name: Lint PR title
+        run: dagger call commitlint-message --message "$PR_TITLE"
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+
+      - name: Lint commit range
+        run: dagger call commitlint-range --from "$FROM_SHA" --to "$TO_SHA"
+        env:
+          FROM_SHA: ${{ github.event.pull_request.base.sha }}
+          TO_SHA: ${{ github.event.pull_request.head.sha }}

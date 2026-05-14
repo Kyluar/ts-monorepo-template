@@ -29,11 +29,13 @@
     },
     "test:e2e": {
       "passThroughEnv": ["PLAYWRIGHT_*"],
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build"],
+      "outputs": ["playwright-report/**"]
     },
     "test:e2e:smoke": {
       "passThroughEnv": ["PLAYWRIGHT_*"],
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build"],
+      "outputs": ["playwright-report/**"]
     }
   }
 }

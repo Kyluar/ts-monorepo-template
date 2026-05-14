@@ -1,0 +1,79 @@
+name: Security
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [main]
+
+concurrency:
+  group: security-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sast:
+    name: "SAST"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    env:
+      _EXPERIMENTAL_DAGGER_RUNNER_HOST: docker-container://dagger-engine-v0.20.6
+
+    steps:
+      - name: Setup
+        run: apt-get update -qq && apt-get install -y -qq --no-install-recommends git curl ca-certificates jq docker.io && update-ca-certificates
+
+      - name: Checkout
+        run: |
+          git init
+          git remote add origin "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}"
+          git fetch origin
+          git checkout "${GITHUB_SHA}"
+
+      - name: Install Dagger
+        run: |
+          curl -fsSL https://dl.dagger.io/dagger/install.sh | DAGGER_VERSION=v0.20.6 sh
+          echo "$GITHUB_WORKSPACE/bin" >> "$GITHUB_PATH"
+
+      - name: Run Semgrep Scan
+        run: dagger call semgrep-scan --since-commit="$SINCE_COMMIT" --output=./semgrep.sarif
+        env:
+          SINCE_COMMIT: ${{ github.event.pull_request.base.sha }}
+
+      - name: Fail on findings
+        run: |
+          count=$(jq '[.runs[].results[]] | length' ./semgrep.sarif)
+          if [ "$count" -gt 0 ]; then
+            echo "::error::Semgrep found $count issue(s). Check the Security tab for details."
+            exit 1
+          fi
+
+  secret-scan:
+    name: "Secret Scan"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    env:
+      _EXPERIMENTAL_DAGGER_RUNNER_HOST: docker-container://dagger-engine-v0.20.6
+
+    steps:
+      - name: Setup
+        run: apt-get update -qq && apt-get install -y -qq --no-install-recommends git curl ca-certificates docker.io && update-ca-certificates
+
+      - name: Checkout
+        run: |
+          git init
+          git remote add origin "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}"
+          git fetch origin
+          git checkout "${GITHUB_SHA}"
+
+      - name: Install Dagger
+        run: |
+          curl -fsSL https://dl.dagger.io/dagger/install.sh | DAGGER_VERSION=v0.20.6 sh
+          echo "$GITHUB_WORKSPACE/bin" >> "$GITHUB_PATH"
+
+      - name: Run TruffleHog Scan
+        run: dagger call trufflehog-scan --since-commit="$SINCE_COMMIT"
+        env:
+          SINCE_COMMIT: ${{ github.event.pull_request.base.sha }}

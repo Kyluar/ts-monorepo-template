@@ -37,12 +37,14 @@ export interface ICiModule {
 
     /**
      * Runs Renovate Bot to update dependencies via the Dagger container
-     * @param token GitHub PAT with repo and issues:write scopes
+     * @param token PAT with repo and issues:write scopes
      * @param repository repository in "owner/repo" format
      * @param dryRun simulate without creating PRs (default=false)
      * @param gitAuthor git author in "Name <email>" format for Renovate commits
+     * @param platform git hosting platform (default="github")
+     * @param endpoint base API URL for self-hosted or non-GitHub platforms (e.g. "https://codeberg.org/api/v1/")
      */
-    renovate(token: Secret, repository: string, dryRun: boolean, gitAuthor: Secret): Promise<void>
+    renovate(token: Secret, repository: string, dryRun: boolean, gitAuthor: Secret, platform?: string, endpoint?: string): Promise<void>
 
     /**
      * Builds and publishs an app from the monorepo (Dockerfile required)

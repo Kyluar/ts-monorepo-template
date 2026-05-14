@@ -78,7 +78,7 @@ App disponível em `http://localhost:3000`.
 | Docker | qualquer |
 | Dagger CLI | qualquer |
 | TruffleHog | qualquer (CLI nativo) |
-| `RENOVATE_TOKEN` (GitHub PAT) | — |
+| `RENOVATE_TOKEN` | — |
 | `RENOVATE_GIT_AUTHOR` (Actions variable) | — |
 
 > Instale o pnpm com `corepack enable && corepack prepare pnpm@10.33.0 --activate`.
@@ -89,9 +89,20 @@ App disponível em `http://localhost:3000`.
 
 > Instale o TruffleHog com `brew install trufflehog` (macOS/Linux), `choco install trufflehog` (Windows) ou via [GitHub Releases](https://github.com/trufflesecurity/trufflehog/releases). O binário `trufflehog` deve estar no `PATH` — os hooks `pre-commit` e `pre-push` o chamam diretamente.
 
+> Defina a variável de Actions `RENOVATE_GIT_AUTHOR` em **Settings → Secrets and variables → Actions → Variables** com o autor Git que o Renovate usará nos commits (ex: `Renovate Bot <bot@seudominio.com>`). Sem isso, o Renovate usa o email padrão da Mend (`renovate@whitesourcesoftware.com`), que a plataforma de hospedagem pode marcar como `Unverified`.
+
+<details>
+<summary>🔑 RENOVATE_TOKEN</summary>
+
+#### GitHub
+
 > Crie um GitHub **fine-grained PAT** com as permissões: `Contents` (read & write), `Pull Requests` (read & write), `Workflows` (read & write), `Issues` (read & write), `Commit Statuses` (read-only) e `Metadata` (read-only). Salve como secret `RENOVATE_TOKEN` em **Settings → Secrets and variables → Actions** do repositório. O `GITHUB_TOKEN` padrão não funciona porque PRs criados por ele não disparam workflows de CI.
 
-> Defina a variável de Actions `RENOVATE_GIT_AUTHOR` em **Settings → Secrets and variables → Actions → Variables** com o autor Git que o Renovate usará nos commits (ex: `Renovate Bot <bot@seudominio.com>`). Sem isso, o Renovate usa o email padrão da Mend (`renovate@whitesourcesoftware.com`), que o GitHub marca como `Unverified` por causa do Vigilant Mode.
+#### Codeberg
+
+> O workflow do Renovate no Codeberg usa o `GITHUB_TOKEN` provido automaticamente pelo Forgejo Actions — nenhum secret manual é necessário no repositório. Para **executar o Renovate localmente via Dagger CLI**, crie um **Codeberg PAT clássico** (sem restrição de repositório) em **Settings → Applications → Access Tokens** com os escopos: `read:user`, `read:organization`, `write:issue` e `write:repository`. O token **não pode ser scoped para um repositório específico** — o Renovate chama `/api/v1/user` e `/api/v1/orgs/{owner}` na inicialização, endpoints de nível de usuário inacessíveis por tokens com escopo de repositório.
+
+</details>
 
 ## Instalação e execução local
 
@@ -191,12 +202,70 @@ Use `pnpm commit` para o assistente interativo ou escreva manualmente seguindo o
 
 ## CI
 
-Cinco workflows em `.github/workflows/`:
+O template inclui cinco workflows para duas plataformas:
+
+- **`.github/workflows/`** — GitHub Actions
+- **`.forgejo/workflows/`** — Codeberg ([Forgejo Actions](https://docs.codeberg.org/ci/actions/))
 
 | Workflow | Trigger | O que faz |
 |---|---|---|
 | `check.yml` | PRs para `main` | Qualidade de código + build (via Dagger) |
 | `tests.yml` | PRs para `main` | Testes unitários + cobertura (artifact 30 dias) e E2E completo (todos os browsers); faz upload do report Playwright em falha (via Dagger) |
 | `commitlint.yml` | PRs para `main` | Lint do título e range de commits do PR (via Dagger) |
-| `security.yml` | PRs para `main` | Semgrep SAST (com upload SARIF para GitHub Code Scanning) + TruffleHog secret scan (via Dagger) |
+| `security.yml` | PRs para `main` | Semgrep SAST (com upload SARIF para GitHub Code Scanning) + TruffleHog secret scan (via Dagger); falha o job se houver findings |
 | `renovate.yml` | Agendado (segundas, 6h) + manual | Executa o Renovate via Dagger para atualização automática de dependências |
+
+### Setup do runner (Codeberg)
+
+O CI usa Forgejo Actions com um **runner self-hosted** e um **engine Dagger persistente** no host do runner. Sem esse setup, todos os workflows falham com `driver for scheme "docker-container" was not available`.
+
+#### 1. Instalar e registrar o runner
+
+Siga a [documentação oficial do Forgejo runner](https://forgejo.org/docs/latest/admin/actions/). O runner deve ter Docker disponível no host e o usuário do runner deve pertencer ao grupo `docker`.
+
+No Forgejo UI (**Settings → Actions → Runners → Create Runner**), crie o runner e copie o UUID e token exibidos. Adicione-os manualmente ao `runner-config.yml` junto com o label correto:
+
+```yaml
+server:
+  connections:
+    codeberg:
+      url: https://codeberg.org/
+      uuid: <uuid-exibido-no-forgejo-ui>
+      token: <token-exibido-no-forgejo-ui>
+      labels:
+        - ubuntu-24.04:docker://docker.io/library/ubuntu:24.04
+```
+
+> O label `ubuntu-24.04` deve coincidir exatamente com o `runs-on` dos workflows. Se definido em `server.connections`, tem precedência sobre `runner.labels` (nível global).
+
+#### 2. Iniciar o engine Dagger persistente
+
+No host do runner, execute uma única vez:
+
+```sh
+docker run -d \
+  --name dagger-engine-v0.20.6 \
+  --privileged \
+  -v dagger-engine-data:/var/lib/dagger \
+  --restart unless-stopped \
+  registry.dagger.io/engine:v0.20.6
+```
+
+O nome do container (`dagger-engine-v0.20.6`) deve coincidir com a variável `_EXPERIMENTAL_DAGGER_RUNNER_HOST` nos workflows.
+
+#### 3. Configurar o runner para montar o socket Docker
+
+No `runner-config.yml`, adicione:
+
+```yaml
+container:
+  network: "bridge"
+  docker_host: ""
+  options: "--volume /var/run/docker.sock:/var/run/docker.sock"
+  valid_volumes:
+    - /var/run/docker.sock
+```
+
+Reinicie o runner após a alteração: `sudo systemctl restart forgejo-runner`.
+
+> **Por que é necessário:** o Dagger CLI usa o esquema `docker-container://` para se conectar ao engine, o que requer acesso ao Docker daemon via socket. O campo `valid_volumes` é obrigatório — sem ele o runner bloqueia o mount mesmo que `options` esteja configurado.
