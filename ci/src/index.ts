@@ -129,7 +129,7 @@ export class CiModule implements ICiModule {
   }
 
   @func()
-  async buildAndPublishApp(app: string, ttl: string = '1h'): Promise<string> {  
+  async buildAndPublishApp(app: string, ttl: string = '1h'): Promise<string> {
     const dockerfile = `/apps/${app}/Dockerfile`
     const dockerfileExists = await this.source.exists(dockerfile)
 
@@ -142,5 +142,14 @@ export class CiModule implements ICiModule {
 
     const image = dag.utils({source: this.source}).buildImage(dockerfile)
     return dag.utils({source: this.source}).ttlShPublish(image, imageName, ttl)
+  }
+
+  @func()
+  async publishVersionedApp(app: string, version: string, ttl: string = '24h'): Promise<string> {
+    const dockerfile = `/apps/${app}/Dockerfile`
+    const dockerfileExists = await this.source.exists(dockerfile)
+    if (!dockerfileExists) throw new Error(`Dockerfile not found on ${dockerfile}`)
+    const image = dag.utils({source: this.source}).buildImage(dockerfile)
+    return dag.utils({source: this.source}).ttlShPublish(image, `${app}-${version}`, ttl)
   }
 }

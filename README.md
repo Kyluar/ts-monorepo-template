@@ -66,6 +66,7 @@ App disponível em `http://localhost:3000`.
 | **Zero-config tooling** | Biome (lint + format), TypeScript strict e Vitest pré-configurados e compartilhados entre todos os packages |
 | **Testes em todas as camadas** | Unit/integração com Vitest + Testing Library e E2E cross-browser com Playwright |
 | **CI production-ready** | GitHub Actions + Dagger: build, testes, commitlint, cobertura, Semgrep SAST, TruffleHog e Renovate para atualização automática de dependências |
+| **Releases automáticos** | Changesets detecta mudanças por PR, bumpa versões semânticas, gera `CHANGELOG.md` e publica imagem Docker com tag semver no merge para `main` |
 | **Segurança desde o commit** | Hooks `pre-commit` e `pre-push` bloqueiam secrets e vulnerabilidades antes de chegar ao remoto |
 | **Commits à prova de falha** | Commitizen + commitlint enforçam gitmoji conventional em todo o time |
 
@@ -81,6 +82,7 @@ App disponível em `http://localhost:3000`.
 | `RENOVATE_TOKEN` (Actions secret) | — |
 | `RENOVATE_GIT_AUTHOR` (Actions secret) | — |
 | `RENOVATE_USERNAME` (Actions variable) | — |
+| `RELEASE_TOKEN` (Actions secret — Codeberg apenas) | — |
 
 > Instale o pnpm com `corepack enable && corepack prepare pnpm@10.33.0 --activate`.
 
@@ -104,6 +106,15 @@ App disponível em `http://localhost:3000`.
 #### Codeberg
 
 > Crie um **Codeberg PAT clássico** (sem restrição de repositório) em **Settings → Applications → Access Tokens** com os escopos: `read:user`, `read:organization`, `write:issue` e `write:repository`. Salve como secret `RENOVATE_TOKEN` em **Settings → Secrets and variables → Actions → Secrets** do repositório. O token **não pode ser scoped para um repositório específico** — o Renovate chama `/api/v1/user` e `/api/v1/orgs/{owner}` na inicialização, endpoints de nível de usuário inacessíveis por tokens com escopo de repositório. O mesmo token é usado pelo workflow de CI e para execução local via Dagger CLI.
+
+</details>
+
+<details>
+<summary>🔑 RELEASE_TOKEN (Codeberg apenas)</summary>
+
+#### Codeberg
+
+> Crie um **Codeberg PAT clássico** em **Settings → Applications → Access Tokens** com o escopo `write:repository`. Salve como secret `RELEASE_TOKEN` em **Settings → Secrets and variables → Actions → Secrets** do repositório. O workflow `release.yml` usa esse token para fazer push do commit de versão e das tags — o `GITHUB_TOKEN` equivalente no Codeberg não tem permissões de escrita suficientes por padrão. **No GitHub esse secret não é necessário** — o `GITHUB_TOKEN` automático já tem as permissões corretas.
 
 </details>
 
@@ -183,6 +194,15 @@ pnpm security:secrets  # TruffleHog em todos os arquivos rastreados pelo git
 pnpm commit           # assistente interativo gitmoji conventional (commitizen)
 ```
 
+### Versioning (Changesets)
+
+```sh
+pnpm changeset        # registra mudanças para a próxima release (interativo)
+pnpm changeset:status # mostra quais packages têm bumps pendentes
+```
+
+> Execute `pnpm changeset` antes de abrir um PR quando a mudança deve gerar uma release. O arquivo `.changeset/*.md` gerado deve ser commitado junto com o código. PRs sem changeset são válidos — não disparam release.
+
 ## Qualidade e convenções
 
 ### Biome
@@ -217,6 +237,8 @@ O template inclui cinco workflows para duas plataformas:
 | `commitlint.yml` | PRs para `main` | Lint do título e range de commits do PR (via Dagger) |
 | `security.yml` | PRs para `main` | Semgrep SAST (com upload SARIF para GitHub Code Scanning) + TruffleHog secret scan (via Dagger); falha o job se houver findings |
 | `renovate.yml` | Agendado (segundas, 6h) + manual | Executa o Renovate via Dagger para atualização automática de dependências |
+| `release.yml` | Push para `main` | Detecta changesets pendentes, bumpa versões, gera `CHANGELOG.md`, cria git tags (`web@x.y.z`) |
+| `docker-release.yml` | Push de tag `web@*` | Publica imagem Docker em `ttl.sh/web-<versão>:24h` via Dagger |
 
 ### Setup do runner (Codeberg)
 

@@ -60,6 +60,13 @@ pnpm commit                       # interactive gitmoji conventional commit (com
 ```
 Commits must follow gitmoji conventional format — enforced by commitlint on `commit-msg` hook and in CI for PRs. Format: `<emoji> <type>(<scope>): <description>` (e.g. `✨ feat(ui): add Button component`).
 
+### Versioning (Changesets)
+```sh
+pnpm changeset                    # register a change for the next release (interactive)
+pnpm changeset:status             # list packages with pending version bumps
+```
+Run `pnpm changeset` before opening a PR when the change should trigger a release. The generated `.changeset/*.md` file must be committed with the code. PRs without a changeset are valid and will not trigger a release.
+
 ### Docker / CI (Dagger)
 ```sh
 make build        # build Docker image via Dagger (reads Node/pnpm versions dynamically)
@@ -109,7 +116,11 @@ ci/             # Dagger CI module (TypeScript)
   - `commitlint.yml` (`Validate Commits`) — lints PR title and commit range with commitlint via Dagger on all PRs
   - `security.yml` — two jobs: Semgrep SAST (`semgrep-scan`, outputs SARIF uploaded to GitHub Code Scanning) + TruffleHog secret scan (`trufflehog-scan`) on PRs
   - `renovate.yml` — runs Renovate via Dagger on a schedule (Mondays 6am) and on `workflow_dispatch`; requires `RENOVATE_TOKEN` Actions secret (classic Codeberg PAT, not repository-scoped, with scopes `read:user`, `read:organization`, `write:issue`, `write:repository`); requires `RENOVATE_GIT_AUTHOR` Actions secret (e.g. `Renovate Bot <email>`) — treated as secret because it contains a personal email; requires `RENOVATE_USERNAME` Actions variable set to the Codeberg username that owns the token — without it Renovate queries PRs as `forgejo-actions`, a user that does not exist in Codeberg's public API
-- The `buildAndPublishApp` function builds a Dockerfile from `apps/<app>/Dockerfile` and publishes to ttl.sh with a tag `<branch>-<app>-<commitId>`
+- The `buildAndPublishApp` function builds a Dockerfile from `apps/<app>/Dockerfile` and publishes to ttl.sh with a tag `<branch>-<app>-<commitId>` (used for branch/preview builds)
+- The `publishVersionedApp` function publishes with a semver tag `<app>-<version>` (used by `docker-release.yml` on `web@*` tag pushes)
+- Six GitHub Actions workflows in `.github/workflows/` (mirrored in `.forgejo/workflows/`):
+  - `release.yml` — runs on push to `main`; detects pending changesets, bumps versions, generates `CHANGELOG.md`, creates git tags; uses `GITHUB_TOKEN` on GitHub, requires `RELEASE_TOKEN` secret on Codeberg
+  - `docker-release.yml` — runs on `web@*` tag push; extracts semver from tag and calls `publishVersionedApp` via Dagger
 
 ### Tooling
 

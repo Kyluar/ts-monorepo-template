@@ -1,0 +1,67 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: "Release"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    if: "!contains(github.event.head_commit.message, 'chore(release): version packages')"
+    permissions:
+      contents: write
+
+    steps:
+      - name: Setup system
+        run: apt-get update -qq && apt-get install -y -qq --no-install-recommends git curl ca-certificates && update-ca-certificates
+
+      - name: Checkout
+        env:
+          RELEASE_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        run: |
+          git init
+          ORIGIN="https://x-token-auth:${RELEASE_TOKEN}@${GITHUB_SERVER_URL#https://}/${GITHUB_REPOSITORY}"
+          git remote add origin "$ORIGIN"
+          git fetch --unshallow origin main
+          git checkout main
+
+      - name: Setup Node
+        run: |
+          NODE_VERSION=$(cat .nvmrc | tr -d 'v\n')
+          curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION%%.*}.x | bash -
+          apt-get install -y -qq nodejs
+
+      - name: Setup pnpm
+        run: |
+          PNPM_VERSION=$(node -e "const p=require('./package.json'); console.log(p.packageManager.split('@')[1])")
+          corepack enable
+          corepack prepare pnpm@${PNPM_VERSION} --activate
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Configure git identity
+        run: |
+          git config user.name "forgejo-actions"
+          git config user.email "forgejo-actions@noreply.codeberg.org"
+
+      - name: Release
+        env:
+          RELEASE_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        run: |
+          CHANGESET_COUNT=$(find .changeset -name "*.md" ! -name "README.md" | wc -l)
+          if [ "$CHANGESET_COUNT" -gt "0" ]; then
+            pnpm changeset version
+            git add .
+            git commit -m "🔖 chore(release): version packages"
+            ORIGIN="https://x-token-auth:${RELEASE_TOKEN}@${GITHUB_SERVER_URL#https://}/${GITHUB_REPOSITORY}"
+            git push "$ORIGIN" main
+            pnpm changeset tag
+            git push "$ORIGIN" --tags
+          fi
