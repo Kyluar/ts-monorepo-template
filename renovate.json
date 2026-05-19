@@ -4,6 +4,7 @@
   "dependencyDashboard": true,
   "schedule": ["before 8am on Monday"],
   "prConcurrentLimit": 3,
+  "rebaseWhen": "behind-base-branch",
   "automergeType": "pr",
   "platformAutomerge": true,
   "commitMessagePrefix": "🏗️ build(deps):",
