@@ -31,9 +31,7 @@ jobs:
           curl -fsSL https://dl.dagger.io/dagger/install.sh | DAGGER_VERSION=v0.20.6 sh
           echo "$GITHUB_WORKSPACE/bin" >> "$GITHUB_PATH"
 
-      - name: Extract version from tag
-        id: version
-        run: echo "version=${GITHUB_REF_NAME#web@}" >> $GITHUB_OUTPUT
-
       - name: Publish versioned Docker image
-        run: dagger call publish-versioned-app --app=web --version=${{ steps.version.outputs.version }}
+        run: |
+          IMAGE=$(dagger call publish-versioned-app --tag=${GITHUB_REF_NAME})
+          echo "Published Docker image: $IMAGE"

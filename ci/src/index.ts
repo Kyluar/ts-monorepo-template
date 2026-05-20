@@ -162,11 +162,12 @@ export class CiModule implements ICiModule {
   }
 
   @func()
-  async publishVersionedApp(app: string, version: string, ttl: string = '24h'): Promise<string> {
+  async publishVersionedApp(tag: string, ttl: string = '24h'): Promise<string> {
+    const [app, version] = tag.split('@')
     const dockerfile = `/apps/${app}/Dockerfile`
     const dockerfileExists = await this.source.exists(dockerfile)
     if (!dockerfileExists) throw new Error(`Dockerfile not found on ${dockerfile}`)
     const image = dag.utils({source: this.source}).buildImage(dockerfile)
-    return dag.utils({source: this.source}).ttlShPublish(image, `${app}-${version}`, ttl)
+    return image.publish(`ttl.sh/${app}-${version}:${ttl}`)
   }
 }

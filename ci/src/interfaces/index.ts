@@ -56,11 +56,10 @@ export interface ICiModule {
 
     /**
      * Builds and publishes an app Docker image tagged with a semantic version
-     * @param app name of the app (must have a Dockerfile at apps/<app>/Dockerfile)
-     * @param version semver string (e.g. "1.2.3")
+     * @param tag app and version in "app@version" format (e.g. "web@1.2.3")
      * @param ttl image TTL on ttl.sh (default "24h")
      */
-    publishVersionedApp(app: string, version: string, ttl?: string): Promise<string>
+    publishVersionedApp(tag: string, ttl?: string): Promise<string>
 
     /**
      * Runs Semgrep SAST scan on files changed since a base commit and returns a SARIF report

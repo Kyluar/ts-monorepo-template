@@ -17,13 +17,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
 
-      - name: Extract version from tag
-        id: version
-        run: echo "version=${GITHUB_REF_NAME#web@}" >> $GITHUB_OUTPUT
-
       - name: Publish versioned Docker image
+        id: publish
         uses: dagger/dagger-for-github@27b130bf0f79a7f6fbbbe0fbca6760dc9bb40a77 # v8.4.1
         with:
           version: "latest"
           verb: call
-          args: publish-versioned-app --app=web --version=${{ steps.version.outputs.version }}
+          args: >-
+            publish-versioned-app --tag=${{ github.ref_name }}
+
+      - name: Print image address
+        run: |
+          echo "Published Docker image: ${{ steps.publish.outputs.output }}"
