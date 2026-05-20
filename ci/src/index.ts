@@ -145,6 +145,23 @@ export class CiModule implements ICiModule {
   }
 
   @func()
+  async release(
+    token: Secret,
+    repoUrl: string,
+    gitAuthorName: string = "forgejo-actions",
+    gitAuthorEmail: string = "forgejo-actions@noreply.codeberg.org"
+  ): Promise<void> {
+    await dag.utils({ source: this.source })
+      .baseEnvironment()
+      .withSecretVariable("RELEASE_TOKEN", token)
+      .withEnvVariable("REPO_URL", repoUrl)
+      .withExec(["git", "config", "user.name", gitAuthorName])
+      .withExec(["git", "config", "user.email", gitAuthorEmail])
+      .withExec(["sh", "scripts/changesets/release.sh"])
+      .sync()
+  }
+
+  @func()
   async publishVersionedApp(app: string, version: string, ttl: string = '24h'): Promise<string> {
     const dockerfile = `/apps/${app}/Dockerfile`
     const dockerfileExists = await this.source.exists(dockerfile)

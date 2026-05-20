@@ -237,7 +237,7 @@ O template inclui cinco workflows para duas plataformas:
 | `commitlint.yml` | PRs para `main` | Lint do título e range de commits do PR (via Dagger) |
 | `security.yml` | PRs para `main` | Semgrep SAST (com upload SARIF para GitHub Code Scanning) + TruffleHog secret scan (via Dagger); falha o job se houver findings |
 | `renovate.yml` | Agendado (segundas, 6h) + manual | Executa o Renovate via Dagger para atualização automática de dependências |
-| `release.yml` | Push para `main` | Detecta changesets pendentes, bumpa versões, gera `CHANGELOG.md`, cria git tags (`web@x.y.z`) |
+| `release.yml` | Push para `main` | Detecta changesets pendentes, bumpa versões, gera `CHANGELOG.md`, cria git tags (`web@x.y.z`) (via Dagger) |
 | `docker-release.yml` | Push de tag `web@*` | Publica imagem Docker em `ttl.sh/web-<versão>:24h` via Dagger |
 
 ### Setup do runner (Codeberg)

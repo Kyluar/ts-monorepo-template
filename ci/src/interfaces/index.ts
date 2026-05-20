@@ -45,7 +45,7 @@ export interface ICiModule {
      * @param endpoint base API URL for self-hosted or non-GitHub platforms (e.g. "https://codeberg.org/api/v1/")
      * @param username username associated with the token — required for Renovate to find its own PRs via the platform API
      */
-    renovate(token: Secret, repository: string, dryRun: boolean, gitAuthor: Secret, platform?: string, endpoint?: string, username: string): Promise<void>
+    renovate(token: Secret, repository: string, dryRun: boolean, gitAuthor: Secret, username: string, platform?: string, endpoint?: string): Promise<void>
 
     /**
      * Builds and publishs an app from the monorepo (Dockerfile required)
@@ -73,4 +73,14 @@ export interface ICiModule {
      * @param sinceCommit scan commits newer than this SHA (defaults to "HEAD~1")
      */
     trufflehogScan(sinceCommit?: string): Promise<string>
+
+    /**
+     * Detects pending changesets, bumps package versions, commits the changes, creates git tags, and pushes everything to the remote.
+     * Does nothing when no changeset files are present.
+     * @param token PAT with write access to the repository
+     * @param repoUrl full repository URL (e.g. "https://codeberg.org/owner/repo")
+     * @param gitAuthorName git user.name for the version bump commit (default="forgejo-actions")
+     * @param gitAuthorEmail git user.email for the version bump commit (default="forgejo-actions@noreply.codeberg.org")
+     */
+    release(token: Secret, repoUrl: string, gitAuthorName?: string, gitAuthorEmail?: string): Promise<void>
 }

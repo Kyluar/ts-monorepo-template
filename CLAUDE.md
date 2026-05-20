@@ -96,7 +96,7 @@ packages/
   typescript-config/  # shared tsconfig presets
   biome-config/       # shared biome config
 ci/             # Dagger CI module (TypeScript)
-  src/index.ts  # CI pipelines: codeQuality, buildProject, commitlint, buildAndPublishApp
+  src/index.ts  # CI pipelines: codeQuality, buildProject, commitlint, buildAndPublishApp, release
   utils/        # Dagger utility module (base container, image build, publish)
 ```
 
@@ -119,7 +119,7 @@ ci/             # Dagger CI module (TypeScript)
 - The `buildAndPublishApp` function builds a Dockerfile from `apps/<app>/Dockerfile` and publishes to ttl.sh with a tag `<branch>-<app>-<commitId>` (used for branch/preview builds)
 - The `publishVersionedApp` function publishes with a semver tag `<app>-<version>` (used by `docker-release.yml` on `web@*` tag pushes)
 - Six GitHub Actions workflows in `.github/workflows/` (mirrored in `.forgejo/workflows/`):
-  - `release.yml` — runs on push to `main`; detects pending changesets, bumps versions, generates `CHANGELOG.md`, creates git tags; uses `GITHUB_TOKEN` on GitHub, requires `RELEASE_TOKEN` secret on Codeberg
+  - `release.yml` — runs on push to `main` via Dagger (`release` function); detects pending changesets, bumps versions, generates `CHANGELOG.md`, creates git tags; uses `GITHUB_TOKEN` on GitHub, requires `RELEASE_TOKEN` secret on Codeberg
   - `docker-release.yml` — runs on `web@*` tag push; extracts semver from tag and calls `publishVersionedApp` via Dagger
 
 ### Tooling

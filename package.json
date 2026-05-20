@@ -16,7 +16,6 @@
     "security:secrets": "sh scripts/secret/full-scan.sh",
     "changeset": "changeset",
     "changeset:status": "changeset status",
-    "release": "changeset version && changeset tag",
     "commit": "cz",
     "prepare": "husky"
   },
