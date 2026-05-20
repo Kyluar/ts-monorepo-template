@@ -74,6 +74,17 @@ export interface ICiModule {
     trufflehogScan(sinceCommit?: string): Promise<string>
 
     /**
+     * Runs Trivy SCA filesystem scan on npm dependencies, failing on HIGH or CRITICAL CVEs
+     */
+    trivyFsScan(): Promise<void>
+
+    /**
+     * Runs Trivy SCA image scan on all apps with a Dockerfile under apps/*, failing on HIGH or CRITICAL CVEs.
+     * Auto-discovers apps — no configuration needed when new apps are added.
+     */
+    trivyImageScan(): Promise<void>
+
+    /**
      * Detects pending changesets, bumps package versions, commits the changes, creates git tags, and pushes everything to the remote.
      * Does nothing when no changeset files are present.
      * @param token PAT with write access to the repository

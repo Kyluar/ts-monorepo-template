@@ -5,6 +5,7 @@ import {
   type Directory,
   type File,
   type Secret,
+  type Container,
   object,
   func
 } from "@dagger.io/dagger";
@@ -74,6 +75,40 @@ export class CiModule implements ICiModule {
     .withExec(
       ["sh", "-c", `trufflehog git file://. ${args}`],
     ).stderr()
+  }
+
+  @func()
+  async trivyFsScan(): Promise<void> {
+    await dag.container()
+      .from(IMAGES.trivy)
+      .withMountedDirectory("/src", this.source)
+      .withWorkdir("/src")
+      .withExec(["trivy", "fs", "--exit-code", "1", "--severity", "HIGH,CRITICAL", "--no-progress", "."])
+      .sync()
+  }
+
+  @func()
+  async trivyImageScan(): Promise<void> {
+    const entries = await this.source.directory("apps").entries()
+
+    const scanPromises: Promise<Container>[] = []
+    for (const entry of entries) {
+      const dockerfile = `/apps/${entry}/Dockerfile`
+      if (!(await this.source.exists(dockerfile))) continue
+
+      const image = await dag.utils({ source: this.source }).buildImage(dockerfile)
+      const tar = image.asTarball()
+
+      scanPromises.push(
+        dag.container()
+          .from(IMAGES.trivy)
+          .withMountedFile("/image.tar", tar)
+          .withExec(["trivy", "image", "--exit-code", "1", "--severity", "HIGH,CRITICAL", "--no-progress", "--input", "/image.tar"])
+          .sync()
+      )
+    }
+
+    await Promise.all(scanPromises)
   }
 
   @func()

@@ -58,10 +58,15 @@
       "commitMessageTopic": "react packages"
     },
     {
+      "groupName": "vitest",
+      "matchPackageNames": ["vite", "@vitejs/plugin-react", "vitest", "@vitest/coverage-v8"],
+      "commitMessageTopic": "vitest packages"
+    },
+    {
       "matchFileNames": ["ci/src/images.ts"],
       "automerge": false,
       "dependencyDashboardApproval": true,
-      "description": "Imagens de segurança (semgrep, trufflehog) requerem aprovação manual"
+      "description": "Imagens de segurança (semgrep, trufflehog, trivy) requerem aprovação manual"
     },
     {
       "matchPackageNames": ["node", "pnpm"],

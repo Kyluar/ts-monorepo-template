@@ -33,7 +33,12 @@ COPY --from=pruner /app/out/full .
 
 RUN pnpm run build
 
-FROM base AS runner
+FROM base AS runtime
+RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx \
+    && rm -rf /root/.cache/node/corepack \
+    && rm -rf /usr/local/lib/node_modules/corepack /usr/local/bin/corepack
+
+FROM runtime AS runner
 ENV NODE_ENV=production
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs

@@ -64,3 +64,28 @@ jobs:
           version: "latest"
           verb: call
           args: trufflehog-scan --since-commit=${{ github.event.pull_request.base.sha }}
+
+  sca:
+    name: "SCA"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
+
+      - name: Run Trivy FS Scan
+        uses: dagger/dagger-for-github@27b130bf0f79a7f6fbbbe0fbca6760dc9bb40a77 # v8.4.1
+        with:
+          version: "latest"
+          verb: call
+          args: trivy-fs-scan
+
+      - name: Run Trivy Image Scan
+        uses: dagger/dagger-for-github@27b130bf0f79a7f6fbbbe0fbca6760dc9bb40a77 # v8.4.1
+        with:
+          version: "latest"
+          verb: call
+          args: trivy-image-scan

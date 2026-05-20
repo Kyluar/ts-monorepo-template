@@ -65,7 +65,7 @@ App disponível em `http://localhost:3000`.
 |---|---|
 | **Zero-config tooling** | Biome (lint + format), TypeScript strict e Vitest pré-configurados e compartilhados entre todos os packages |
 | **Testes em todas as camadas** | Unit/integração com Vitest + Testing Library e E2E cross-browser com Playwright |
-| **CI production-ready** | GitHub Actions + Dagger: build, testes, commitlint, cobertura, Semgrep SAST, TruffleHog e Renovate para atualização automática de dependências |
+| **CI production-ready** | GitHub Actions + Dagger: build, testes, commitlint, cobertura, Semgrep SAST, TruffleHog, Trivy SCA (dependências npm + imagens Docker) e Renovate para atualização automática de dependências |
 | **Releases automáticos** | Changesets detecta mudanças por PR, bumpa versões semânticas, gera `CHANGELOG.md` e publica imagem Docker com tag semver no merge para `main` |
 | **Segurança desde o commit** | Hooks `pre-commit` e `pre-push` bloqueiam secrets e vulnerabilidades antes de chegar ao remoto |
 | **Commits à prova de falha** | Commitizen + commitlint enforçam gitmoji conventional em todo o time |
@@ -235,7 +235,7 @@ O template inclui cinco workflows para duas plataformas:
 | `check.yml` | PRs para `main` | Qualidade de código + build (via Dagger) |
 | `tests.yml` | PRs para `main` | Testes unitários + cobertura (artifact 30 dias) e E2E completo (todos os browsers); faz upload do report Playwright em falha (via Dagger) |
 | `commitlint.yml` | PRs para `main` | Lint do título e range de commits do PR (via Dagger) |
-| `security.yml` | PRs para `main` | Semgrep SAST (com upload SARIF para GitHub Code Scanning) + TruffleHog secret scan (via Dagger); falha o job se houver findings |
+| `security.yml` | PRs para `main` | Semgrep SAST (com upload SARIF para GitHub Code Scanning) + TruffleHog secret scan + Trivy SCA (filesystem e image scan, falha em HIGH/CRITICAL) (via Dagger); falha o job se houver findings |
 | `renovate.yml` | Agendado (segundas, 6h) + manual | Executa o Renovate via Dagger para atualização automática de dependências |
 | `release.yml` | Push para `main` | Detecta changesets pendentes, bumpa versões, gera `CHANGELOG.md`, cria git tags (`web@x.y.z`) (via Dagger) |
 | `docker-release.yml` | Push de tag `web@*` | Publica imagem Docker em `ttl.sh/web-<versão>:24h` via Dagger |

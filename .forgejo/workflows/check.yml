@@ -35,14 +35,5 @@ jobs:
           curl -fsSL https://dl.dagger.io/dagger/install.sh | DAGGER_VERSION=v0.20.6 sh
           echo "$GITHUB_WORKSPACE/bin" >> "$GITHUB_PATH"
 
-      - name: Debug
-        run: |
-          dagger version
-          echo "_EXPERIMENTAL_DAGGER_RUNNER_HOST=$_EXPERIMENTAL_DAGGER_RUNNER_HOST"
-          ls -la /var/run/docker.sock 2>/dev/null || echo "no socket"
-
-      - name: Code Quality
-        run: dagger call code-quality
-
-      - name: Build Project
-        run: dagger call build-project
+      - name: Check
+        run: dagger check
